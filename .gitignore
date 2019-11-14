@@ -1,0 +1,9 @@
+# Object
+*.o
+*.d
+*.exe
+mlem2
+
+# Local
+*.DS_Store
+.vscode/

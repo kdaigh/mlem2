@@ -1,0 +1,10 @@
+< a a a d >
+[ Wind Humidity Temperature Trip ]
+4 low medium yes
+8 low low yes
+4 medium medium yes
+8 medium high maybe
+12 low medium maybe
+16 high low no
+30 high high no
+12 high high no
