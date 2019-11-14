@@ -23,9 +23,9 @@ public:
         m_minValue = minValue;
         m_maxValue = maxValue;
     }
-    bool addOnMatch(Value * value, int caseNo){
+    bool addOnMatch(Value * value, int x){
         if(value->getNumValue() >= m_minValue && value->getNumValue() <= m_maxValue){
-            m_block.emplace(caseNo);
+            m_block.insert(x);
             return true;
         }
         return false;

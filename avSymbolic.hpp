@@ -20,9 +20,9 @@ public:
         : AV(attr, attrCol) {
         m_value = value;
     }
-    bool addOnMatch(Value * value, int caseNo){
+    bool addOnMatch(Value * value, int x){
         if(m_value.compare(value->getStrValue()) == 0){
-            m_block.insert(caseNo);
+            m_block.insert(x);
             return true;
         }
         return false;

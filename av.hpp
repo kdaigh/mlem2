@@ -31,7 +31,7 @@ public:
     
     /* TEMPLATE: Adds if value of block and specified case match.
        @returns True if add is successful; False, otherwise. */
-    virtual bool addOnMatch(Value * value, int caseNo) = 0;
+    virtual bool addOnMatch(Value * value, int x) = 0;
 
     /* Gets the size of the block set. */
     virtual size_t size() const {

@@ -19,6 +19,14 @@ std::set<int> setDifference(std::set<int> setA, std::set<int> setB){
     return diffSet;
 }
 
+std::vector<std::set<int>> listDifference(std::vector<std::set<int>> listA, std::vector<std::set<int>> listB){
+    std::vector<std::set<int>> diffList;
+    std::set_difference(listA.begin(), listA.end(),
+                        listB.begin(), listB.end(),
+                        std::back_inserter(diffList));
+    return diffList;
+}
+
 std::set<int> setIntersection(std::set<int> setA, std::set<int> setB){
     std::set<int> intersectSet;
     std::set_intersection(setA.begin(), setA.end(),
@@ -65,6 +73,18 @@ void printSet(std::string label, std::set<int> set){
     std::cout << label << "{";
     for(int i : set){
         std::cout << i << ", ";
+    }
+    std::cout << "}\n";
+}
+
+void printList(std::string label, std::vector<std::set<int>> list){
+    std::cout << label << "{";
+    for(set<int> set : list){
+        std::cout << "{";
+        for(int i : set){
+            std::cout << i << ", ";
+        }
+        std::cout << "}, ";
     }
     std::cout << "}\n";
 }

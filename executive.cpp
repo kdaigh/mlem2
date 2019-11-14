@@ -124,73 +124,66 @@ set<set<int>> Executive::MLEM2(vector<AV *> AV, set<int> B){
     set<int> G = B;
     set<set<int>> LC;
     // LOOP: While G is non-empty
-    while(!G.empty()){
+    //while(!G.empty()){
         printSet("B = ", B);
         printSet("G = ", G);
-        set<int> T;
+        vector<set<int>> T;
         vector<set<int>> T_G;
-        //set<int> T_G;
 
         // LOOP: For all attribute-value blocks
         for(int i = 0; i < AV.size(); i++){
-            // IF: Intersection of [(a,v)] and G is non-empty
-            // if(commonElements(AV[i]->getBlock(), G)){
-            //     T_G.insert(i);
-            // }  
-            T_G.push_back(AV[i]->getBlock);
+            T_G.push_back(setIntersection(AV[i]->getBlock(), G));
         }
-
-        for(set<int> t : T_G){
-            printSet("t(G)", t);
-        }
-        //printSet("T(G) = ", T_G);
-
-        vector<set<int>> test = getBlocks(AV, T);
-        for(set<int> t : test){
-            printSet("t = ", t);
-        }
-        
-        set<int> test1 = subsetIntersection(getBlocks(AV, T));
-        printSet("[T] = ", test1);
 
         // LOOP: While T is non-empty or T is not subsetEq to B
-        while(T.empty() || !(subsetEq(subsetIntersection(getBlocks(AV, T)), B))){
-            // Find optimal choice; Add it to [t]
-            int choicePos = getOptimalChoice(AV, getBlocks(AV, T_G));
-            T.insert(choicePos);
+        while(T.empty() || !(subsetEq(subsetIntersection(T), B))){
+            // Find optimal choice; Add it to T
+            int choicePos = getOptimalChoice(AV, T_G);
+            T.push_back(AV[choicePos]->getBlock());
 
             // TEST
-            //std::cout << "best choice @ " << choicePos << std::endl;
-            //printSet("T = ", T);
+            std::cout << "best choice @ " << choicePos << std::endl;
+            printList("T = ", T);
+            printList("T_G = ", T_G);
 
             // Update goal set
             G = setIntersection(AV[choicePos]->getBlock(), G);
-
-            // LOOP: For all attribute-value blocks
+            
+            // Update intersections
             for(int i = 0; i < AV.size(); i++){
-                // IF: Intersection of [(a,v)] and G is non-empty
-                if(commonElements(AV[i]->getBlock(), G)){
-                    T_G.insert(i);
-                }  
-            }
-            T_G = setDifference(T_G, T);
-        }
-        for(int t : T){
-            set<int> TMinusT = reduceT(T, t);
-            if(subsetEq(subsetIntersection(getBlocks(AV, TMinusT)), B)){
-                T = TMinusT;
+                set<int> coveredCases = subsetIntersection(T);
+                if(subsetEq(coveredCases, AV[i]->getBlock())){
+                    T_G[i].clear();
+                }
+                else {
+                    T_G[i] = setIntersection(AV[i]->getBlock(), G);
+                }
             }
         }
-        LC.insert(T);
-        G = setDifference(B, subsetUnion(getListBlocks(AV, LC)));
+        
+    //     for(int i = 0; i < AV.size(); i++){
+    //         set<int> tMinus = setDifference(subsetIntersection(T), AV[i]->getBlock());
+    //         if(subsetEq(tMinus, B)){
+                
+    //         }
+    //     }
 
-        for(set<int> T : LC){
-            set<set<int>> temp = reduceLC(LC, T);
-            if(subsetUnion(getListBlocks(AV, temp)) == B){
-                LC = temp;
-            }
-        }
-    }
+    //     for(int t : T){
+    //         set<int> TMinusT = reduceT(T, t);
+    //         if(subsetEq(subsetIntersection(getBlocks(AV, TMinusT)), B)){
+    //             T = TMinusT;
+    //         }
+    //     }
+    //     LC.insert(T);
+    //     G = setDifference(B, subsetUnion(getListBlocks(AV, LC)));
+
+    //     for(set<int> T : LC){
+    //         set<set<int>> temp = reduceLC(LC, T);
+    //         if(subsetUnion(getListBlocks(AV, temp)) == B){
+    //             LC = temp;
+    //         }
+    //     }
+    // }
     return LC;
 }
 
@@ -227,6 +220,7 @@ set<set<int>> Executive::reduceLC(set<set<int>> & LC, set<int> T){
 int Executive::getOptimalChoice(vector<AV *> AV, vector<set<int>> T_G){
     std::list<int> maxSizePos;
     int maxSize = 0, minCard = INT_MAX, pos = -1;
+
     // LOOP: For each set intersection
     for(int i = 0; i < T_G.size(); i++){
         // IF: Set is non-empty
