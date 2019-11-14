@@ -9,6 +9,7 @@
     of the program. */
 
 #include "executive.hpp"
+#include "setUtils.hpp"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -105,26 +106,165 @@ void Executive::runMLEM2(){
     // FUNC: Generate attribute-value blocks
     generateBlocks();
 
-    // MLEM2 * mlem2 = new MLEM2(m_avBlocks);
+    // TODO: Generate concepts
+    // TEST: Test concept for yes
+    set<int> conceptYes;
+    conceptYes.emplace(1);
+    conceptYes.emplace(2);
+    conceptYes.emplace(3);
 
-    // // TODO: Generate concepts
-    // // TEST: Test concept for yes
-    // set<int> conceptYes;
-    // conceptYes.emplace(1);
-    // conceptYes.emplace(2);
-    // conceptYes.emplace(3);
+    set<set<int>> localCovering = MLEM2(m_avBlocks, conceptYes);
+
+
 
     // mlem2->induceRules(conceptYes);
 }
 
-// set<set<int>> MLEM2(vector<Block *> AV, set<int> B){
-//     set<int> G = B;
-//     set<set<int>> localCovering;
-//     while(!G.empty()){
-//         set<int> T;
-//         set<int> T_G;
-//     }
-// }
+set<set<int>> Executive::MLEM2(vector<AV *> AV, set<int> B){
+    set<int> G = B;
+    set<set<int>> LC;
+    // LOOP: While G is non-empty
+    while(!G.empty()){
+        printSet("B = ", B);
+        printSet("G = ", G);
+        set<int> T;
+        vector<set<int>> T_G;
+        //set<int> T_G;
+
+        // LOOP: For all attribute-value blocks
+        for(int i = 0; i < AV.size(); i++){
+            // IF: Intersection of [(a,v)] and G is non-empty
+            // if(commonElements(AV[i]->getBlock(), G)){
+            //     T_G.insert(i);
+            // }  
+            T_G.push_back(AV[i]->getBlock);
+        }
+
+        for(set<int> t : T_G){
+            printSet("t(G)", t);
+        }
+        //printSet("T(G) = ", T_G);
+
+        vector<set<int>> test = getBlocks(AV, T);
+        for(set<int> t : test){
+            printSet("t = ", t);
+        }
+        
+        set<int> test1 = subsetIntersection(getBlocks(AV, T));
+        printSet("[T] = ", test1);
+
+        // LOOP: While T is non-empty or T is not subsetEq to B
+        while(T.empty() || !(subsetEq(subsetIntersection(getBlocks(AV, T)), B))){
+            // Find optimal choice; Add it to [t]
+            int choicePos = getOptimalChoice(AV, getBlocks(AV, T_G));
+            T.insert(choicePos);
+
+            // TEST
+            //std::cout << "best choice @ " << choicePos << std::endl;
+            //printSet("T = ", T);
+
+            // Update goal set
+            G = setIntersection(AV[choicePos]->getBlock(), G);
+
+            // LOOP: For all attribute-value blocks
+            for(int i = 0; i < AV.size(); i++){
+                // IF: Intersection of [(a,v)] and G is non-empty
+                if(commonElements(AV[i]->getBlock(), G)){
+                    T_G.insert(i);
+                }  
+            }
+            T_G = setDifference(T_G, T);
+        }
+        for(int t : T){
+            set<int> TMinusT = reduceT(T, t);
+            if(subsetEq(subsetIntersection(getBlocks(AV, TMinusT)), B)){
+                T = TMinusT;
+            }
+        }
+        LC.insert(T);
+        G = setDifference(B, subsetUnion(getListBlocks(AV, LC)));
+
+        for(set<int> T : LC){
+            set<set<int>> temp = reduceLC(LC, T);
+            if(subsetUnion(getListBlocks(AV, temp)) == B){
+                LC = temp;
+            }
+        }
+    }
+    return LC;
+}
+
+vector<set<int>> Executive::getBlocks(vector<AV *> AV, set<int> & cases){
+    vector<set<int>> retVec;
+    for(int c : cases){
+        retVec.push_back(AV[c]->getBlock());
+    }
+    return retVec;
+}
+
+vector<set<int>> Executive::getListBlocks(vector<AV *> AV, set<set<int>> & cases){
+    vector<set<int>> retVec;
+    for(set<int> c : cases){
+        retVec.push_back(subsetIntersection(getBlocks(AV, c)));
+    }
+    return retVec;
+}
+
+set<int> Executive::reduceT(set<int> & T, int t){
+    set<int> temp = T;
+    temp.erase(t);
+    return temp;
+}
+
+set<set<int>> Executive::reduceLC(set<set<int>> & LC, set<int> T){
+    set<set<int>> temp = LC;
+    temp.erase(T);
+    return temp;
+}
+
+/* Uses criteria to select optimal choice.
+   @returns Position of optimal choice. */
+int Executive::getOptimalChoice(vector<AV *> AV, vector<set<int>> T_G){
+    std::list<int> maxSizePos;
+    int maxSize = 0, minCard = INT_MAX, pos = -1;
+    // LOOP: For each set intersection
+    for(int i = 0; i < T_G.size(); i++){
+        // IF: Set is non-empty
+        if(!(T_G[i].empty())){
+            // IF: Current size is larger than maxSize, clear list and add index
+            if(T_G[i].size() > maxSize){
+                maxSize = T_G[i].size();
+                maxSizePos.clear();
+                maxSizePos.push_back(i);
+            // IF: Current size is equal to maxSize, add index for consideration
+            } else if (T_G[i].size() == maxSize){
+                maxSizePos.push_back(i);
+            }
+        }
+    }
+
+    // IF: Unique largest size is found, return position
+    if(maxSizePos.size() == 1){
+        return maxSizePos.front();
+    }
+
+    // LOOP: For each set intersection in maxSizePos
+    for(int i : maxSizePos){
+        // IF: Set is non-empty
+        if(!(T_G[i].empty())){
+            // IF: Current cardinality is smaller than minCard, update minCard
+            if(AV[i]->size() < minCard){
+                minCard = AV[i]->size();
+                pos = i;
+            // IF: Current size is equal to minCard, cardinality is not unique
+            } else if (AV[i]->size() == minCard){
+                break;
+            }
+        }
+    }
+    // RETURN: Position with smallest cardinality or first occuring if tie
+    return pos;     
+}
 
 bool Executive::generateOutFile(string filename){
     ofstream file;
