@@ -34,6 +34,9 @@ public:
         }
         cout << "}" << endl;
     }
+    void printLabel() const {
+        cout << "(" << m_attr << ", " << m_value << ")";
+    }
 private:
     string m_value;
 };

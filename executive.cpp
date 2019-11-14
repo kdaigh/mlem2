@@ -114,23 +114,34 @@ void Executive::runMLEM2(){
     conceptYes.emplace(2);
     conceptYes.emplace(3);
 
-    vector<vector<set<int>>> localCovering = MLEM2(m_avBlocks, conceptYes);
-    cout << "Local covering: \n";
-    for(vector<set<int>> T : localCovering){
-        printList("T = ", T);
+    vector<set<int>> ruleset = MLEM2(m_avBlocks, conceptYes);
+    
+    for(int i = 0; i < ruleset.size(); i++){
+        printRule(ruleset[i], "yes");
     }
-
-
-    // mlem2->induceRules(conceptYes);
 }
 
-vector<vector<set<int>>> Executive::MLEM2(vector<AV *> AV, set<int> B){
+void Executive::printRule(set<int> attributes, string decValue){
+    int index = 0;
+    for(int a : attributes){
+        m_avBlocks[a]->printLabel();
+        if(index + 1 != attributes.size()){
+            cout << " & ";
+        }
+        index++;
+    }
+    cout << " -> (" << m_data->getDecision() << ", " << decValue << ")" << endl;
+}
+
+vector<set<int>> Executive::MLEM2(vector<AV *> AV, set<int> B){
     set<int> G = B;
     vector<vector<set<int>>> LC;
+    vector<set<int>> LC_indices;
 
     // LOOP: While G is non-empty
     while(!G.empty()){
         vector<set<int>> T;
+        set<int> T_indices;
         vector<set<int>> T_G;
         
         // LOOP: For all attribute-value blocks
@@ -143,6 +154,7 @@ vector<vector<set<int>>> Executive::MLEM2(vector<AV *> AV, set<int> B){
             // Find optimal choice; Add it to T
             int choicePos = getOptimalChoice(AV, T_G);
             T.push_back(AV[choicePos]->getBlock());
+            T_indices.insert(choicePos);
 
             // Update goal set
             G = setIntersection(AV[choicePos]->getBlock(), G);
@@ -164,11 +176,13 @@ vector<vector<set<int>>> Executive::MLEM2(vector<AV *> AV, set<int> B){
             vector<set<int>> tMinus = removeCondition(T, i);
             if(subsetEq(subsetIntersection(tMinus), B)){
                 T = tMinus;
+                T_indices.erase(i);
             }
         }
 
         // Add to local coverings
         LC.push_back(T);
+        LC_indices.push_back(T_indices);
         
         // Update goal set
         vector<set<int>> tIntersects; 
@@ -188,9 +202,10 @@ vector<vector<set<int>>> Executive::MLEM2(vector<AV *> AV, set<int> B){
         }
         if(subsetUnion(tIntersects) == B){
             LC = lcMinus;
+            LC_indices.erase(LC_indices.begin() + i);
         }
     }
-    return LC;
+    return LC_indices;
 }
 
 vector<set<int>> Executive::removeCondition(vector<set<int>> & T, int index){

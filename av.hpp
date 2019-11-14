@@ -41,6 +41,9 @@ public:
     /* TEMPLATE: Outputs the attribute-value block. Used for debugging. */
     virtual void print() const = 0;
 
+    /* TEMPLATE: Prints (Attribute, value) in the given format. */
+    virtual void printLabel() const = 0;
+
 protected:
     string m_attr;
     int m_attrCol;

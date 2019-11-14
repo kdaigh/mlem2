@@ -13,6 +13,7 @@
 #include <list>
 #include <string>
 #include <iostream>
+#include <iomanip>
 
 using namespace std;
 
@@ -36,6 +37,11 @@ public:
             cout << caseNo << ", ";
         }
         cout << "}" << endl;
+    }
+    void printLabel() const {
+        cout << "(" << m_attr << ", ";
+        cout << setprecision(3) << m_minValue << "..";
+        cout << setprecision(3) << m_maxValue << ")";
     }
 private:
     float m_minValue;

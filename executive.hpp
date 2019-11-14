@@ -34,7 +34,7 @@ public:
     /* Runs MLEM2 on the dataset. */
     void runMLEM2();
 
-    std::vector<std::vector<std::set<int>>> MLEM2(std::vector<AV *> AV, std::set<int> B);
+    std::vector<std::set<int>> MLEM2(std::vector<AV *> AV, std::set<int> B);
 
     int getOptimalChoice(std::vector<AV *> AV, std::vector<std::set<int>> T_G);
 
@@ -44,6 +44,8 @@ public:
     /* Prints ruleset structure to a file.
        @returns True if file write is successful; false, otherwise. */
     bool generateOutFile(std::string filename);
+
+    void printRule(std::set<int> attributes, std::string decValue);
 
 private:
     Dataset * m_data;
