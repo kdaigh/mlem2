@@ -179,14 +179,19 @@ vector<vector<set<int>>> Executive::MLEM2(vector<AV *> AV, set<int> B){
         }
         G = setDifference(B, subsetUnion(tIntersects));
     }
-    
-    //     for(set<int> T : LC){
-    //         set<set<int>> temp = reduceLC(LC, T);
-    //         if(subsetUnion(getListBlocks(AV, temp)) == B){
-    //             LC = temp;
-    //         }
-    //     }
-    // }
+
+    // Remove unnecessary rules
+    for(int i = 0; i < LC.size(); i++){
+        vector<vector<set<int>>> lcMinus = removeRule(LC, i);
+
+        vector<set<int>> tIntersects; 
+        for(vector<set<int>> T : lcMinus){
+            tIntersects.push_back(subsetIntersection(T));
+        }
+        if(subsetUnion(tIntersects) == B){
+            LC = lcMinus;
+        }
+    }
     return LC;
 }
 
@@ -208,6 +213,12 @@ vector<set<int>> Executive::getListBlocks(vector<AV *> AV, set<set<int>> & cases
 
 vector<set<int>> Executive::removeCondition(vector<set<int>> & T, int index){
     vector<set<int>> temp = T;
+    temp.erase(temp.begin() + (index - 1));
+    return temp;
+}
+
+vector<vector<set<int>>> Executive::removeRule(vector<vector<set<int>>> & T, int index){
+    vector<vector<set<int>>> temp = T;
     temp.erase(temp.begin() + (index - 1));
     return temp;
 }

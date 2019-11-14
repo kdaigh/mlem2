@@ -41,7 +41,8 @@ public:
     std::vector<std::set<int>> getBlocks(std::vector<AV *> AV, std::set<int> & cases);
     std::vector<std::set<int>> getListBlocks(std::vector<AV *> AV, std::set<set<int>> & cases);
 
-    std::vector<std::set<int>> removeCondition(vector<std::set<int>> & T, int index);
+    std::vector<std::set<int>> removeCondition(std::vector<std::set<int>> & T, int index);
+    std::vector<std::vector<std::set<int>>> removeRule(std::vector<std::vector<std::set<int>>> & T, int index);
     //std::set<std::set<int>> reduceLC(std::set<std::set<int>> & LC, std::set<int> T);
 
     /* Prints ruleset structure to a file.
