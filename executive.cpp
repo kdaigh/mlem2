@@ -14,6 +14,7 @@
 #include <sstream>
 #include <iostream>
 #include <stdexcept>
+#include <limits.h>
 
 using namespace std;
 
@@ -114,7 +115,10 @@ void Executive::runMLEM2(){
     conceptYes.emplace(3);
 
     vector<vector<set<int>>> localCovering = MLEM2(m_avBlocks, conceptYes);
-
+    cout << "Local covering: \n";
+    for(vector<set<int>> T : localCovering){
+        printList("T = ", T);
+    }
 
 
     // mlem2->induceRules(conceptYes);
@@ -123,14 +127,12 @@ void Executive::runMLEM2(){
 vector<vector<set<int>>> Executive::MLEM2(vector<AV *> AV, set<int> B){
     set<int> G = B;
     vector<vector<set<int>>> LC;
+
     // LOOP: While G is non-empty
     while(!G.empty()){
-        printSet("B = ", B);
-        printSet("G = ", G);
         vector<set<int>> T;
         vector<set<int>> T_G;
         
-
         // LOOP: For all attribute-value blocks
         for(int i = 0; i < AV.size(); i++){
             T_G.push_back(setIntersection(AV[i]->getBlock(), G));
@@ -141,10 +143,6 @@ vector<vector<set<int>>> Executive::MLEM2(vector<AV *> AV, set<int> B){
             // Find optimal choice; Add it to T
             int choicePos = getOptimalChoice(AV, T_G);
             T.push_back(AV[choicePos]->getBlock());
-
-            // TEST
-            std::cout << "best choice @ " << choicePos << std::endl;
-            printList("T = ", T);
 
             // Update goal set
             G = setIntersection(AV[choicePos]->getBlock(), G);
@@ -195,31 +193,15 @@ vector<vector<set<int>>> Executive::MLEM2(vector<AV *> AV, set<int> B){
     return LC;
 }
 
-vector<set<int>> Executive::getBlocks(vector<AV *> AV, set<int> & cases){
-    vector<set<int>> retVec;
-    for(int c : cases){
-        retVec.push_back(AV[c]->getBlock());
-    }
-    return retVec;
-}
-
-vector<set<int>> Executive::getListBlocks(vector<AV *> AV, set<set<int>> & cases){
-    vector<set<int>> retVec;
-    for(set<int> c : cases){
-        retVec.push_back(subsetIntersection(getBlocks(AV, c)));
-    }
-    return retVec;
-}
-
 vector<set<int>> Executive::removeCondition(vector<set<int>> & T, int index){
     vector<set<int>> temp = T;
-    temp.erase(temp.begin() + (index - 1));
+    temp.erase(temp.begin() + index);
     return temp;
 }
 
 vector<vector<set<int>>> Executive::removeRule(vector<vector<set<int>>> & T, int index){
     vector<vector<set<int>>> temp = T;
-    temp.erase(temp.begin() + (index - 1));
+    temp.erase(temp.begin() + index);
     return temp;
 }
 

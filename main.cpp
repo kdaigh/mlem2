@@ -6,6 +6,9 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <limits>
+
+using namespace std;
 
 /* Utility function */
 string getFile(string type);
