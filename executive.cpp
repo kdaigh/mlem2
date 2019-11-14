@@ -113,22 +113,23 @@ void Executive::runMLEM2(){
     conceptYes.emplace(2);
     conceptYes.emplace(3);
 
-    set<set<int>> localCovering = MLEM2(m_avBlocks, conceptYes);
+    vector<vector<set<int>>> localCovering = MLEM2(m_avBlocks, conceptYes);
 
 
 
     // mlem2->induceRules(conceptYes);
 }
 
-set<set<int>> Executive::MLEM2(vector<AV *> AV, set<int> B){
+vector<vector<set<int>>> Executive::MLEM2(vector<AV *> AV, set<int> B){
     set<int> G = B;
-    set<set<int>> LC;
+    vector<vector<set<int>>> LC;
     // LOOP: While G is non-empty
-    //while(!G.empty()){
+    while(!G.empty()){
         printSet("B = ", B);
         printSet("G = ", G);
         vector<set<int>> T;
         vector<set<int>> T_G;
+        
 
         // LOOP: For all attribute-value blocks
         for(int i = 0; i < AV.size(); i++){
@@ -144,11 +145,10 @@ set<set<int>> Executive::MLEM2(vector<AV *> AV, set<int> B){
             // TEST
             std::cout << "best choice @ " << choicePos << std::endl;
             printList("T = ", T);
-            printList("T_G = ", T_G);
 
             // Update goal set
             G = setIntersection(AV[choicePos]->getBlock(), G);
-            
+                
             // Update intersections
             for(int i = 0; i < AV.size(); i++){
                 set<int> coveredCases = subsetIntersection(T);
@@ -160,23 +160,26 @@ set<set<int>> Executive::MLEM2(vector<AV *> AV, set<int> B){
                 }
             }
         }
+
+        // Remove unnecessary conditions
+        for(int i = 0; i < T.size(); i++){
+            vector<set<int>> tMinus = removeCondition(T, i);
+            if(subsetEq(subsetIntersection(tMinus), B)){
+                T = tMinus;
+            }
+        }
+
+        // Add to local coverings
+        LC.push_back(T);
         
-    //     for(int i = 0; i < AV.size(); i++){
-    //         set<int> tMinus = setDifference(subsetIntersection(T), AV[i]->getBlock());
-    //         if(subsetEq(tMinus, B)){
-                
-    //         }
-    //     }
-
-    //     for(int t : T){
-    //         set<int> TMinusT = reduceT(T, t);
-    //         if(subsetEq(subsetIntersection(getBlocks(AV, TMinusT)), B)){
-    //             T = TMinusT;
-    //         }
-    //     }
-    //     LC.insert(T);
-    //     G = setDifference(B, subsetUnion(getListBlocks(AV, LC)));
-
+        // Update goal set
+        vector<set<int>> tIntersects; 
+        for(vector<set<int>> T : LC){
+            tIntersects.push_back(subsetIntersection(T));
+        }
+        G = setDifference(B, subsetUnion(tIntersects));
+    }
+    
     //     for(set<int> T : LC){
     //         set<set<int>> temp = reduceLC(LC, T);
     //         if(subsetUnion(getListBlocks(AV, temp)) == B){
@@ -203,15 +206,9 @@ vector<set<int>> Executive::getListBlocks(vector<AV *> AV, set<set<int>> & cases
     return retVec;
 }
 
-set<int> Executive::reduceT(set<int> & T, int t){
-    set<int> temp = T;
-    temp.erase(t);
-    return temp;
-}
-
-set<set<int>> Executive::reduceLC(set<set<int>> & LC, set<int> T){
-    set<set<int>> temp = LC;
-    temp.erase(T);
+vector<set<int>> Executive::removeCondition(vector<set<int>> & T, int index){
+    vector<set<int>> temp = T;
+    temp.erase(temp.begin() + (index - 1));
     return temp;
 }
 

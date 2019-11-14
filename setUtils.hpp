@@ -70,6 +70,9 @@ bool commonElements(std::set<int> setA, std::set<int> setB){
 }
 
 void printSet(std::string label, std::set<int> set){
+    if(set.empty()){
+        return;
+    }
     std::cout << label << "{";
     for(int i : set){
         std::cout << i << ", ";
@@ -78,6 +81,9 @@ void printSet(std::string label, std::set<int> set){
 }
 
 void printList(std::string label, std::vector<std::set<int>> list){
+    if(list.empty()){
+        return;
+    }
     std::cout << label << "{";
     for(set<int> set : list){
         std::cout << "{";

@@ -34,15 +34,15 @@ public:
     /* Runs MLEM2 on the dataset. */
     void runMLEM2();
 
-    std::set<std::set<int>> MLEM2(std::vector<AV *> AV, std::set<int> B);
+    std::vector<std::vector<std::set<int>>> MLEM2(std::vector<AV *> AV, std::set<int> B);
 
     int getOptimalChoice(std::vector<AV *> AV, std::vector<std::set<int>> T_G);
 
     std::vector<std::set<int>> getBlocks(std::vector<AV *> AV, std::set<int> & cases);
     std::vector<std::set<int>> getListBlocks(std::vector<AV *> AV, std::set<set<int>> & cases);
 
-    std::set<int> reduceT(std::set<int> & T, int t);
-    std::set<std::set<int>> reduceLC(std::set<std::set<int>> & LC, std::set<int> T);
+    std::vector<std::set<int>> removeCondition(vector<std::set<int>> & T, int index);
+    //std::set<std::set<int>> reduceLC(std::set<std::set<int>> & LC, std::set<int> T);
 
     /* Prints ruleset structure to a file.
        @returns True if file write is successful; false, otherwise. */
