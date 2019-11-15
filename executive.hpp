@@ -10,9 +10,9 @@
 
 #ifndef EXECUTIVE_H
 #define EXECUTIVE_H
+#include "av.hpp"
 #include "avNumeric.hpp"
 #include "avSymbolic.hpp"
-#include "av.hpp"
 #include "dataset.hpp"
 #include <string>
 
@@ -29,10 +29,7 @@ public:
 
 class Executive {
 public:
-    /* Initializes member data structures and values. */
     Executive();
-
-    /* Destroys member data structures. */
     ~Executive();
 
     /* Reads the file into a dataset structure.

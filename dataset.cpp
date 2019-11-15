@@ -11,6 +11,7 @@
 #include "dataset.hpp"
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
@@ -22,6 +23,11 @@ Dataset::Dataset(const int cols) : m_cols(cols) {
 
 Dataset::~Dataset() {
     delete[] m_attributes;
+    for(int i = 0; i < m_values->getNumCols(); i++){
+        for(Value * v : (m_values->m_array[i])){
+            delete v;
+        }
+    }
     delete m_values;
 }
 

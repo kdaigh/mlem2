@@ -15,6 +15,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <limits.h>
+#include <algorithm>
 #define DEBUG false
 
 using namespace std;
@@ -27,6 +28,9 @@ Executive::Executive(){
 
 Executive::~Executive(){
     delete m_data;
+    for(int i = 0; i < m_avBlocks.size(); i++){
+        delete m_avBlocks[i];
+    }
 }
 
 bool Executive::parseInFile(string filename) {

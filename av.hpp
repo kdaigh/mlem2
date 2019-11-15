@@ -19,7 +19,7 @@ class AV {
 public:
     AV(string attr, int attrCol) 
         : m_attr(attr), m_attrCol(attrCol) { }
-
+    virtual ~AV(){}
     virtual set<int> getBlock() const {
         return m_block;
     }

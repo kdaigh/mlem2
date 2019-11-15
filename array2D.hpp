@@ -36,14 +36,17 @@ public:
             throw out_of_range("Invalid array coordinates.");
         } 
     }
+    size_t getNumCols() const {
+        return m_cols;
+    }
     size_t getNumRows() const {
         return m_array[m_cols - 1].size();
     }
     vector<T> getCol(int col) const{
         return m_array[col];
     }
+    vector<T> * m_array;
 private:
     const int m_cols;
     size_t m_offset;
-    vector<T> * m_array;
 };
