@@ -89,9 +89,8 @@ bool Executive::generateOutFile(string filename){
         for(set<int> r : ruleset){
             file << ruleString(r, c);
         }
+        delete c;
     }
-    /*  TODO: Write to file
-        EX: file << "Writing this to a file.\n"; */
 
     file.close();
     return true;

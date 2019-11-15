@@ -19,7 +19,6 @@
 class Concept {
 public:
     Concept(string d, string v) : decision(d), value(v) {}
-
     void addCase(int c){ block.insert(c); }
 
     string decision;
