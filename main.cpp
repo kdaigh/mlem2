@@ -16,21 +16,20 @@ string getFile(string type);
 int main(int argc, char* argv[]){
     bool validFile = false;
     string inFile, outFile;
-    Executive * exec = new Executive();
+    Executive exec;
 
     // Request input file from user
     while(!validFile){
         inFile = getFile("input");
-        validFile = exec->parseInFile(inFile);
+        validFile = exec.parseInFile(inFile);
     }
 
     // Run rule induction algorithm on dataset and print to file
     validFile = false;
     while(!validFile){
         outFile = getFile("output");
-        validFile = exec->generateOutFile(outFile);
+        validFile = exec.generateOutFile(outFile);
     }
-    delete exec;
     return 0;
 }
 
