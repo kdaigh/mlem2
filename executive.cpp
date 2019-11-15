@@ -65,17 +65,17 @@ bool Executive::parseInFile(string filename) {
 
 void Executive::run(){
     // Generate attribute-value blocks
-    vector<AV *> avBlocks = generateAVBlocks();
+    generateAVBlocks();
     
     // Generate concepts
     vector <Concept *> concepts = generateConcepts();
 
     // LOOP: For each concept
     for(Concept * c : concepts){
-        vector<set<int>> ruleset = induceRules(avBlocks, c->block);
+        vector<set<int>> ruleset = induceRules(c->block);
         // LOOP: For each rule
         for(set<int> r : ruleset){
-            printRule(r, c, avBlocks);
+            printRule(r, c);
         }
     }
 }
@@ -96,9 +96,7 @@ bool Executive::generateOutFile(string filename){
     return true;
 }
 
-vector<AV *> Executive::generateAVBlocks(){
-    vector<AV *> avBlocks;
-
+void Executive::generateAVBlocks(){
     // LOOP: For each attribute (column)
     for(int col = 0; col < m_numAttributes; col++){
         string attr = m_data->getAttribute(col);
@@ -110,8 +108,8 @@ vector<AV *> Executive::generateAVBlocks(){
 
             // LOOP: For each cutpoint, create (empty) attribute-value blocks 
             for (float c : cutpoints){
-                avBlocks.push_back(new AVNumeric(attr, col, min, c));
-                avBlocks.push_back(new AVNumeric(attr, col, c, max));
+                m_avBlocks.push_back(new AVNumeric(attr, col, min, c));
+                m_avBlocks.push_back(new AVNumeric(attr, col, c, max));
             }
         }
         // IF: Attribute values are symbolic
@@ -120,27 +118,26 @@ vector<AV *> Executive::generateAVBlocks(){
 
             // LOOP: For each value, create an (empty) attribute-value block
             for (string v : values){
-                avBlocks.push_back(new AVSymbolic(attr, col, v));
+                m_avBlocks.push_back(new AVSymbolic(attr, col, v));
             }
         }
     }
 
     // Populate attribute-value blocks
     // LOOP: For each attribute-value block
-    for(int i = 0; i < avBlocks.size(); i++){
+    for(int i = 0; i < m_avBlocks.size(); i++){
 
         // LOOP: For each case (row), add matching values to the block
         for(int r = 1; r <= m_data->getNumCases(); r++){
-            int c = avBlocks[i]->getAttrCol();
+            int c = m_avBlocks[i]->getAttrCol();
             
-            avBlocks[i]->addOnMatch(m_data->getValue(r, c), r);    
+            m_avBlocks[i]->addOnMatch(m_data->getValue(r, c), r);    
         }
 
         #if DEBUG == true
-            avBlocks[i]->print();
+           m_avBlocks[i]->print();
         #endif
     }
-    return avBlocks;
 }
 
 vector<Concept *> Executive::generateConcepts(){
@@ -157,16 +154,15 @@ vector<Concept *> Executive::generateConcepts(){
         for(int r = 1; r <= m_data->getNumCases(); r++){
             int c = m_numAttributes;
             string cellValue = m_data->getValue(r, c)->getStrValue();
-
             if(concepts[i]->value == cellValue){
-                concepts[i]->addCase(i);
+                concepts[i]->addCase(r);
             }
         }
     }
     return concepts;
 }
 
-vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
+vector<set<int>> Executive::induceRules(set<int> B){
     set<int> G = B;
     vector<vector<set<int>>> LC;
     vector<set<int>> LC_indices;
@@ -178,28 +174,31 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
         vector<set<int>> T_G;
         
         // LOOP: For all attribute-value blocks
-        for(int i = 0; i < AV.size(); i++){
-            T_G.push_back(setIntersection(AV[i]->getBlock(), G));
+        for(int i = 0; i < m_avBlocks.size(); i++){
+            T_G.push_back(setIntersection(m_avBlocks[i]->getBlock(), G));
         }
 
         // LOOP: While T is non-empty or T is not subsetEq to B
         while(T.empty() || !(subsetEq(subsetIntersection(T), B))){
             // Find optimal choice; Add it to T
-            int choicePos = getOptimalChoice(AV, T_G);
-            T.push_back(AV[choicePos]->getBlock());
+            int choicePos = getOptimalChoice(m_avBlocks, T_G);
+            #if DEBUG==true
+                cout << "choice @ " << choicePos << endl;
+            #endif
+            T.push_back(m_avBlocks[choicePos]->getBlock());
             T_indices.insert(choicePos);
 
             // Update goal set
-            G = setIntersection(AV[choicePos]->getBlock(), G);
+            G = setIntersection(m_avBlocks[choicePos]->getBlock(), G);
                 
             // Update intersections
-            for(int i = 0; i < AV.size(); i++){
+            for(int i = 0; i < m_avBlocks.size(); i++){
                 set<int> coveredCases = subsetIntersection(T);
-                if(subsetEq(coveredCases, AV[i]->getBlock())){
+                if(subsetEq(coveredCases, m_avBlocks[i]->getBlock())){
                     T_G[i].clear();
                 }
                 else {
-                    T_G[i] = setIntersection(AV[i]->getBlock(), G);
+                    T_G[i] = setIntersection(m_avBlocks[i]->getBlock(), G);
                 }
             }
         }
@@ -241,10 +240,10 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
     return LC_indices;
 }
 
-void Executive::printRule(set<int> attributes, Concept * concept, vector<AV *> avBlocks){
+void Executive::printRule(set<int> attributes, Concept * concept){
     int index = 0;
     for(int a : attributes){
-        avBlocks[a]->printLabel();
+       m_avBlocks[a]->printLabel();
         if(index + 1 != attributes.size()){
             cout << " & ";
         }

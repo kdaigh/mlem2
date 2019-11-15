@@ -49,19 +49,20 @@ public:
 
     /* Generate attribute-value blocks for dataset. 
        @post m_avBlocks is initialized and populated. */
-    std::vector<AV *> generateAVBlocks();
+    void generateAVBlocks();
 
     std::vector<Concept *> generateConcepts();
 
     /* Generate ruleset using MLEM2. */
-    std::vector<std::set<int>> induceRules(std::vector<AV *> AV, std::set<int> B);
+    std::vector<std::set<int>> induceRules(std::set<int> B);
     
     /* Prints a single rule in (a, v) -> (d, v) format. */
-    void printRule(std::set<int> attributes, Concept * decision, std::vector<AV *> avBlocks);
+    void printRule(std::set<int> attributes, Concept * decision);
 
 private:
     Dataset * m_data;
     std::size_t m_numAttributes;
+    std::vector<AV *> m_avBlocks;
 
     /* parseFile HELPER: Parses format line. */
     void parseFormat(std::istream& file);
