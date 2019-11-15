@@ -15,6 +15,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <limits.h>
+#define DEBUG true
 
 using namespace std;
 
@@ -44,7 +45,7 @@ bool Executive::parseInFile(string filename) {
     string word;
     int col = 0;
     while(file >> word){
-        if(col == m_numCols){
+        if(col == m_numAttributes + 1){
             col = 0;
         }
         word = removeComments(word);
@@ -54,14 +55,50 @@ bool Executive::parseInFile(string filename) {
         col++;
     }
 
-    // TEST: Check output of dataset
-    m_data->print();
+    #if DEBUG == true
+        m_data->print();
+    #endif
 
     file.close();
     return true;
 }
 
-void Executive::generateBlocks(){
+void Executive::run(){
+    // Generate attribute-value blocks
+    vector<AV *> avBlocks = generateAVBlocks();
+    
+    // Generate concepts
+    vector <Concept *> concepts = generateConcepts();
+
+    // LOOP: For each concept
+    for(Concept * c : concepts){
+        vector<set<int>> ruleset = induceRules(avBlocks, c->block);
+        // LOOP: For each rule
+        for(set<int> r : ruleset){
+            printRule(r, c, avBlocks);
+        }
+    }
+}
+
+bool Executive::generateOutFile(string filename){
+    ofstream file;
+    file.open(filename);
+
+    // Unable to open file; Signal with boolean
+    if(!file) {
+        return false;
+    }
+
+    /*  TODO: Write to file
+        EX: file << "Writing this to a file.\n"; */
+
+    file.close();
+    return true;
+}
+
+vector<AV *> Executive::generateAVBlocks(){
+    vector<AV *> avBlocks;
+
     // LOOP: For each attribute (column)
     for(int col = 0; col < m_numAttributes; col++){
         string attr = m_data->getAttribute(col);
@@ -73,8 +110,8 @@ void Executive::generateBlocks(){
 
             // LOOP: For each cutpoint, create (empty) attribute-value blocks 
             for (float c : cutpoints){
-                m_avBlocks.push_back(new AVNumeric(attr, col, min, c));
-                m_avBlocks.push_back(new AVNumeric(attr, col, c, max));
+                avBlocks.push_back(new AVNumeric(attr, col, min, c));
+                avBlocks.push_back(new AVNumeric(attr, col, c, max));
             }
         }
         // IF: Attribute values are symbolic
@@ -83,57 +120,53 @@ void Executive::generateBlocks(){
 
             // LOOP: For each value, create an (empty) attribute-value block
             for (string v : values){
-                m_avBlocks.push_back(new AVSymbolic(attr, col, v));
+                avBlocks.push_back(new AVSymbolic(attr, col, v));
             }
         }
     }
 
+    // Populate attribute-value blocks
     // LOOP: For each attribute-value block
-    for(int i = 0; i < m_avBlocks.size(); i++){
+    for(int i = 0; i < avBlocks.size(); i++){
 
         // LOOP: For each case (row), add matching values to the block
         for(int r = 1; r <= m_data->getNumCases(); r++){
-            int c = m_avBlocks[i]->getAttrCol();
+            int c = avBlocks[i]->getAttrCol();
             
-            m_avBlocks[i]->addOnMatch(m_data->getValue(r, c), r);    
+            avBlocks[i]->addOnMatch(m_data->getValue(r, c), r);    
         }
 
-        // TEST: Check output of blocks
-        m_avBlocks[i]->print();
+        #if DEBUG == true
+            avBlocks[i]->print();
+        #endif
     }
+    return avBlocks;
 }
 
-void Executive::runMLEM2(){
-    // FUNC: Generate attribute-value blocks
-    generateBlocks();
-
-    // TODO: Generate concepts
-    // TEST: Test concept for yes
-    set<int> conceptYes;
-    conceptYes.emplace(1);
-    conceptYes.emplace(2);
-    conceptYes.emplace(3);
-
-    vector<set<int>> ruleset = MLEM2(m_avBlocks, conceptYes);
-    
-    for(int i = 0; i < ruleset.size(); i++){
-        printRule(ruleset[i], "yes");
+vector<Concept *> Executive::generateConcepts(){
+    vector <Concept *> concepts;
+    list<string> values = m_data->getPossibleValues(m_numAttributes);
+    for(string v : values){
+        concepts.push_back(new Concept(m_data->getDecision(), v));
     }
-}
 
-void Executive::printRule(set<int> attributes, string decValue){
-    int index = 0;
-    for(int a : attributes){
-        m_avBlocks[a]->printLabel();
-        if(index + 1 != attributes.size()){
-            cout << " & ";
+    // LOOP: For each concept
+    for(int i = 0; i < concepts.size(); i++){
+
+        // LOOP: For each case (row), add matching values to the block
+        for(int r = 1; r <= m_data->getNumCases(); r++){
+            int c = m_numAttributes;
+            string cellValue = m_data->getValue(r, c)->getStrValue();
+
+            if(concepts[i]->value == cellValue){
+                concepts[i]->addCase(i);
+            }
         }
-        index++;
     }
-    cout << " -> (" << m_data->getDecision() << ", " << decValue << ")" << endl;
+    return concepts;
 }
 
-vector<set<int>> Executive::MLEM2(vector<AV *> AV, set<int> B){
+vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
     set<int> G = B;
     vector<vector<set<int>>> LC;
     vector<set<int>> LC_indices;
@@ -208,20 +241,68 @@ vector<set<int>> Executive::MLEM2(vector<AV *> AV, set<int> B){
     return LC_indices;
 }
 
-vector<set<int>> Executive::removeCondition(vector<set<int>> & T, int index){
-    vector<set<int>> temp = T;
-    temp.erase(temp.begin() + index);
-    return temp;
+void Executive::printRule(set<int> attributes, Concept * concept, vector<AV *> avBlocks){
+    int index = 0;
+    for(int a : attributes){
+        avBlocks[a]->printLabel();
+        if(index + 1 != attributes.size()){
+            cout << " & ";
+        }
+        index++;
+    }
+    cout << " -> (" << concept->decision << ", " << concept->value << ")" << endl;
 }
 
-vector<vector<set<int>>> Executive::removeRule(vector<vector<set<int>>> & T, int index){
-    vector<vector<set<int>>> temp = T;
-    temp.erase(temp.begin() + index);
-    return temp;
+void Executive::parseFormat(istream& file){
+    if(file.eof()){
+        cerr << "No format found." << endl;
+        return;
+    }
+
+    string str;
+    getline(file, str);
+    str = removeComments(str);
+    size_t beg = str.find('<');
+    size_t end = str.find('>');
+    if(beg != string::npos && end != string::npos){
+        str = str.substr(beg + 1, end);
+    }
+    for(char& c : str) {
+        if(c == 'a'){
+            m_numAttributes++;
+        }
+    }
 }
 
-/* Uses criteria to select optimal choice.
-   @returns Position of optimal choice. */
+void Executive::parseHeader(istream& file){
+    if(file.eof()){
+        cerr << "No header found." << endl;
+        return;
+    }
+
+    string str, word;
+    file.ignore(MAX_STREAM, '[');
+    file.ignore(MAX_STREAM, ' ');
+    getline(file, str, ']');
+    str = removeComments(str);
+
+    istringstream buffer(str);
+    for(int i = 0; i < m_numAttributes; i++){
+        buffer >> word;
+        m_data->addAttribute(word);      
+    }
+    buffer >> word;
+    m_data->setDecision(word);
+}
+
+string Executive::removeComments(string str){
+    size_t pos = str.find('!');
+    if(pos != string::npos){
+        str.erase(pos);
+    }
+    return str;
+}
+
 int Executive::getOptimalChoice(vector<AV *> AV, vector<set<int>> T_G){
     std::list<int> maxSizePos;
     int maxSize = 0, minCard = INT_MAX, pos = -1;
@@ -265,70 +346,14 @@ int Executive::getOptimalChoice(vector<AV *> AV, vector<set<int>> T_G){
     return pos;     
 }
 
-bool Executive::generateOutFile(string filename){
-    ofstream file;
-    file.open(filename);
-
-    // Unable to open file; Signal with boolean
-    if(!file) {
-        return false;
-    }
-
-    /*  TODO: Write to file
-        EX: file << "Writing this to a file.\n"; */
-
-    file.close();
-    return true;
+vector<set<int>> Executive::removeCondition(vector<set<int>> & T, int index){
+    vector<set<int>> temp = T;
+    temp.erase(temp.begin() + index);
+    return temp;
 }
 
-string Executive::removeComments(string str){
-    size_t pos = str.find('!');
-    if(pos != string::npos){
-        str.erase(pos);
-    }
-    return str;
+vector<vector<set<int>>> Executive::removeRule(vector<vector<set<int>>> & T, int index){
+    vector<vector<set<int>>> temp = T;
+    temp.erase(temp.begin() + index);
+    return temp;
 }
-
-void Executive::parseFormat(istream& file){
-    if(file.eof()){
-        cerr << "No format found." << endl;
-        return;
-    }
-
-    string str;
-    getline(file, str);
-    str = removeComments(str);
-    size_t beg = str.find('<');
-    size_t end = str.find('>');
-    if(beg != string::npos && end != string::npos){
-        str = str.substr(beg + 1, end);
-    }
-    for(char& c : str) {
-        if(c == 'a'){
-            m_numAttributes++;
-        }
-    }
-    m_numCols = m_numAttributes + 1;
-}
-
-void Executive::parseHeader(istream& file){
-    if(file.eof()){
-        cerr << "No header found." << endl;
-        return;
-    }
-
-    string str, word;
-    file.ignore(MAX_STREAM, '[');
-    file.ignore(MAX_STREAM, ' ');
-    getline(file, str, ']');
-    str = removeComments(str);
-
-    istringstream buffer(str);
-    for(int i = 0; i < m_numAttributes; i++){
-        buffer >> word;
-        m_data->addAttribute(word);      
-    }
-    buffer >> word;
-    m_data->setDecision(word);
-}
-

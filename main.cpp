@@ -24,14 +24,14 @@ int main(int argc, char* argv[]){
         validFile = exec->parseInFile(inFile);
     }
 
-    // Run MLEM2 rule induction algorihtm on dataset
-    exec->runMLEM2();
+    // Run rule induction algorithm on dataset
+    exec->run();
 
-    // TODO: call exec->generateOutputFile(outputFilename)
+    // Print outcome of rule induction to file
     validFile = false;
     while(!validFile){
-        inFile = getFile("output");
-        cerr << "TODO: generate output file" << endl;
+        outFile = getFile("output");
+        validFile = exec->generateOutFile(outFile);
     }
 
     return 0;
