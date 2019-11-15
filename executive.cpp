@@ -15,7 +15,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <limits.h>
-#define DEBUG true
+#define DEBUG false
 
 using namespace std;
 
@@ -63,23 +63,6 @@ bool Executive::parseInFile(string filename) {
     return true;
 }
 
-void Executive::run(){
-    // Generate attribute-value blocks
-    generateAVBlocks();
-    
-    // Generate concepts
-    vector <Concept *> concepts = generateConcepts();
-
-    // LOOP: For each concept
-    for(Concept * c : concepts){
-        vector<set<int>> ruleset = induceRules(c->block);
-        // LOOP: For each rule
-        for(set<int> r : ruleset){
-            printRule(r, c);
-        }
-    }
-}
-
 bool Executive::generateOutFile(string filename){
     ofstream file;
     file.open(filename);
@@ -89,6 +72,20 @@ bool Executive::generateOutFile(string filename){
         return false;
     }
 
+    // Generate attribute-value blocks
+    generateAVBlocks();
+    
+    // Generate concepts
+    vector <Concept *> concepts = generateConcepts();
+
+    // LOOP: For each concept
+    for(Concept * c : concepts){
+        vector<set<int>> ruleset = induceRules(m_avBlocks, c->block);
+        // LOOP: For each rule
+        for(set<int> r : ruleset){
+            file << ruleString(r, c);
+        }
+    }
     /*  TODO: Write to file
         EX: file << "Writing this to a file.\n"; */
 
@@ -162,7 +159,7 @@ vector<Concept *> Executive::generateConcepts(){
     return concepts;
 }
 
-vector<set<int>> Executive::induceRules(set<int> B){
+vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
     set<int> G = B;
     vector<vector<set<int>>> LC;
     vector<set<int>> LC_indices;
@@ -174,41 +171,40 @@ vector<set<int>> Executive::induceRules(set<int> B){
         vector<set<int>> T_G;
         
         // LOOP: For all attribute-value blocks
-        for(int i = 0; i < m_avBlocks.size(); i++){
-            T_G.push_back(setIntersection(m_avBlocks[i]->getBlock(), G));
+        for(int i = 0; i < AV.size(); i++){
+            T_G.push_back(setIntersection(AV[i]->getBlock(), G));
         }
 
         // LOOP: While T is non-empty or T is not subsetEq to B
         while(T.empty() || !(subsetEq(subsetIntersection(T), B))){
             // Find optimal choice; Add it to T
-            int choicePos = getOptimalChoice(m_avBlocks, T_G);
-            #if DEBUG==true
-                cout << "choice @ " << choicePos << endl;
-            #endif
-            T.push_back(m_avBlocks[choicePos]->getBlock());
+            int choicePos = getOptimalChoice(AV, T_G);
+            T.push_back(AV[choicePos]->getBlock());
             T_indices.insert(choicePos);
 
             // Update goal set
-            G = setIntersection(m_avBlocks[choicePos]->getBlock(), G);
+            G = setIntersection(AV[choicePos]->getBlock(), G);
                 
             // Update intersections
-            for(int i = 0; i < m_avBlocks.size(); i++){
+            for(int i = 0; i < AV.size(); i++){
                 set<int> coveredCases = subsetIntersection(T);
-                if(subsetEq(coveredCases, m_avBlocks[i]->getBlock())){
+                if(subsetEq(coveredCases, AV[i]->getBlock())){
                     T_G[i].clear();
                 }
                 else {
-                    T_G[i] = setIntersection(m_avBlocks[i]->getBlock(), G);
+                    T_G[i] = setIntersection(AV[i]->getBlock(), G);
                 }
             }
         }
 
-        // Remove unnecessary conditions
-        for(int i = 0; i < T.size(); i++){
-            vector<set<int>> tMinus = removeCondition(T, i);
-            if(subsetEq(subsetIntersection(tMinus), B)){
-                T = tMinus;
-                T_indices.erase(i);
+        if(T.size() > 1){
+            // Remove unnecessary conditions
+            for(int i = 0; i < T.size(); i++){
+                vector<set<int>> tMinus = removeCondition(T, i);
+                if(subsetEq(subsetIntersection(tMinus), B)){
+                    T = tMinus;
+                    T_indices.erase(i);
+                }
             }
         }
 
@@ -225,31 +221,35 @@ vector<set<int>> Executive::induceRules(set<int> B){
     }
 
     // Remove unnecessary rules
-    for(int i = 0; i < LC.size(); i++){
-        vector<vector<set<int>>> lcMinus = removeRule(LC, i);
+    if(LC.size() > 1){
+        for(int i = 0; i < LC.size(); i++){
+            vector<vector<set<int>>> lcMinus = removeRule(LC, i);
 
-        vector<set<int>> tIntersects; 
-        for(vector<set<int>> T : lcMinus){
-            tIntersects.push_back(subsetIntersection(T));
-        }
-        if(subsetUnion(tIntersects) == B){
-            LC = lcMinus;
-            LC_indices.erase(LC_indices.begin() + i);
+            vector<set<int>> tIntersects; 
+            for(vector<set<int>> T : lcMinus){
+                tIntersects.push_back(subsetIntersection(T));
+            }
+            if(subsetUnion(tIntersects) == B){
+                LC = lcMinus;
+                LC_indices.erase(LC_indices.begin() + i);
+            }
         }
     }
     return LC_indices;
 }
 
-void Executive::printRule(set<int> attributes, Concept * concept){
+std::string Executive::ruleString(set<int> attributes, Concept * concept){
     int index = 0;
+    stringstream stream;
     for(int a : attributes){
-       m_avBlocks[a]->printLabel();
+        stream << m_avBlocks[a]->labelString();
         if(index + 1 != attributes.size()){
-            cout << " & ";
+            stream << " & ";
         }
         index++;
     }
-    cout << " -> (" << concept->decision << ", " << concept->value << ")" << endl;
+    stream << " -> (" << concept->decision << ", " << concept->value << ")" << endl;
+    return stream.str();
 }
 
 void Executive::parseFormat(istream& file){
@@ -304,7 +304,7 @@ string Executive::removeComments(string str){
 
 int Executive::getOptimalChoice(vector<AV *> AV, vector<set<int>> T_G){
     std::list<int> maxSizePos;
-    int maxSize = 0, minCard = INT_MAX, pos = -1;
+    int maxSize = 0, minCard = INT_MAX, pos = 0;
 
     // LOOP: For each set intersection
     for(int i = 0; i < T_G.size(); i++){

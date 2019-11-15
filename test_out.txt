@@ -1,0 +1,5 @@
+(Wind, 4..10) & (Wind, 4..14) & (Humidity, medium) -> (Trip, maybe)
+(Wind, 10..30) & (Humidity, low) & (Temperature, medium) -> (Trip, maybe)
+(Humidity, high) -> (Trip, no)
+(Wind, 4..10) -> (Trip, yes)
+(Humidity, low) & (Temperature, low) -> (Trip, yes)

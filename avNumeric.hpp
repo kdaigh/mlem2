@@ -14,6 +14,7 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 using namespace std;
 
@@ -38,10 +39,12 @@ public:
         }
         cout << "}" << endl;
     }
-    void printLabel() const {
-        cout << "(" << m_attr << ", ";
-        cout << setprecision(3) << m_minValue << "..";
-        cout << setprecision(3) << m_maxValue << ")";
+    std::string labelString() const {
+        stringstream stream;
+        stream << "(" << m_attr << ", ";
+        stream << setprecision(3) << m_minValue << "..";
+        stream << setprecision(3) << m_maxValue << ")";
+        return stream.str();
     }
 private:
     float m_minValue;

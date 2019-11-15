@@ -23,11 +23,8 @@ int main(int argc, char* argv[]){
         inFile = getFile("input");
         validFile = exec->parseInFile(inFile);
     }
-
-    // Run rule induction algorithm on dataset
-    exec->run();
-
-    // Print outcome of rule induction to file
+    
+    // Run rule induction algorithm on dataset and print to file
     validFile = false;
     while(!validFile){
         outFile = getFile("output");

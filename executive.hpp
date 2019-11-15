@@ -39,10 +39,6 @@ public:
        @returns True if file read is successful; false, otherwise. */
     bool parseInFile(std::string filename);
 
-    /* Executes the remaining functionality of the algorithm.
-       @pre File has been parsed to dataset. */
-    void run();
-
     /* Prints ruleset structure to a file.
        @returns True if file write is successful; false, otherwise. */
     bool generateOutFile(std::string filename);
@@ -51,13 +47,14 @@ public:
        @post m_avBlocks is initialized and populated. */
     void generateAVBlocks();
 
+    /* Generate concept blocks for dataset. */
     std::vector<Concept *> generateConcepts();
 
     /* Generate ruleset using MLEM2. */
-    std::vector<std::set<int>> induceRules(std::set<int> B);
+    std::vector<std::set<int>> induceRules(std::vector<AV *> AV, std::set<int> B);
     
     /* Prints a single rule in (a, v) -> (d, v) format. */
-    void printRule(std::set<int> attributes, Concept * decision);
+    std::string ruleString(std::set<int> attributes, Concept * decision);
 
 private:
     Dataset * m_data;

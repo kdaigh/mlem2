@@ -13,6 +13,7 @@
 #include <list>
 #include <iostream>
 #include <string>
+#include <sstream>
 
 class AVSymbolic : public AV {
 public:
@@ -34,8 +35,10 @@ public:
         }
         cout << "}" << endl;
     }
-    void printLabel() const {
-        cout << "(" << m_attr << ", " << m_value << ")";
+    std::string labelString() const {
+        stringstream stream;
+        stream << "(" << m_attr << ", " << m_value << ")";
+        return stream.str();
     }
 private:
     string m_value;

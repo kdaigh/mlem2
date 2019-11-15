@@ -42,7 +42,7 @@ public:
     virtual void print() const = 0;
 
     /* TEMPLATE: Prints (Attribute, value) in the given format. */
-    virtual void printLabel() const = 0;
+    virtual std::string labelString() const = 0;
 
 protected:
     string m_attr;
