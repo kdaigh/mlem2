@@ -34,13 +34,13 @@ int main(int argc, char* argv[]){
 }
 
 string getFile(string type){
-    cout << "Please provide an " << type << " file (i.e. test.txt):" << endl;
+    cout << "Please provide an " << type << " file (i.e. " << type << "_test.txt):" << endl;
     string file;
     cin >> file;
     while(cin.fail()){
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(),'\n');
-        cout << "\nPlease provide an " << type << " file (i.e. test.txt):" << endl;
+        cout << "\nPlease provide an " << type << " file (i.e. " << type << "_test.txt):" << endl;
         cin >> file;
     }
     return file;
