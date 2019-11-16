@@ -335,8 +335,8 @@ string Executive::removeComments(string str){
 
 int Executive::getOptimalChoice(vector<AV *> AV, vector<set<int>> T_G){
     std::list<int> maxSizePos;
-    size_t maxSize = 0;
-    int minCard = INT_MAX, pos = 0;
+    size_t maxSize = 0, minCard = INT_MAX;
+    int pos = 0;
 
     // LOOP: For each set intersection
     for(unsigned i = 0; i < T_G.size(); i++){
