@@ -27,9 +27,9 @@ public:
         } else {
             if(isRange(strValue)){
                 m_type = SYMBOLIC;
-                cout << strValue << " is range" << endl;
-            } 
-            m_type = NUMERIC;
+            } else {
+                m_type = NUMERIC;
+            }
         }
     }
     string getStrValue() const{
