@@ -8,6 +8,7 @@
 #ifndef CONCEPT_H
 #define CONCEPT_H
 #include <string>
+#include <sstream>
 #include <set>
 
 using namespace std;
@@ -30,6 +31,19 @@ public:
     }
     void addCase(int c){ 
         m_block.insert(c); 
+    }
+    string toString(){
+        stringstream stream;
+        stream << "[(" << m_decision << ", " << m_value << ")] = {";
+        unsigned index = 0;
+        for(int x : m_block){
+            stream << x;
+            if(index + 1 != m_block.size()){
+                stream << ", ";
+            }
+        }
+        stream << "}";
+        return stream.str();
     }
 private:
     string m_decision;

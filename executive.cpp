@@ -16,7 +16,7 @@
 #include <stdexcept>
 #include <limits.h>
 #include <algorithm>
-#define DEBUG false
+#define DEBUG true
 
 using namespace std;
 
@@ -53,15 +53,20 @@ bool Executive::parseInFile(string filename) {
         if(col == m_numAttributes + 1){
             col = 0;
         }
-        if(word.find('!') != string::npos){
-            word = word.erase('!');
+        size_t pos = word.find('!');
+        if(pos != string::npos){
+            if(pos != 0){
+                word = word.erase(pos);
+            } else {
+                word = "";
+            }         
             string comment;
             getline(file, comment, '\n');
         }
         if(!word.empty()){
             m_data->addValue(col, word);
-        }
-        col++;
+            col++;
+        }  
     }
 
     #if DEBUG == true
@@ -87,6 +92,10 @@ bool Executive::generateOutFile(string filename){
 
     // FOR: Each concept, induce rules
     for(Concept * c : concepts){
+        #if DEBUG == true
+            cout << c->toString() << endl;
+        #endif
+        
         vector<set<int>> ruleset = induceRules(m_avBlocks, c->getBlock());
         // FOR: Each rule, print to file
         for(set<int> r : ruleset){
@@ -172,6 +181,9 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
 
     // WHILE: G is non-empty
     while(!G.empty()){
+        #if DEBUG == true
+            printSet("G = ", G);
+        #endif
         vector<set<int>> T;
         set<int> T_indices;
         vector<set<int>> T_G;
@@ -181,8 +193,16 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
             T_G.push_back(setIntersection(AV[i]->getBlock(), G));
         }
 
+        #if DEBUG == true 
+            printList("T = ", T);
+        #endif
+
+        // Select conditions for rule
         // WHILE: T is non-empty or T is not subsetEq to B
         while(T.empty() || !(subsetEq(subsetIntersection(T), B))){
+            #if DEBUG == true
+                cout << "*";
+            #endif
             // Find optimal choice; Add it to T
             int choicePos = getOptimalChoice(AV, T_G);
             T.push_back(AV[choicePos]->getBlock());
@@ -203,8 +223,8 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
             }
         } // END WHILE (INNER LOOP)
 
+        // Remove unnecessary conditions
         if(T.size() > 1){
-            // Remove unnecessary conditions
             for(unsigned i = 0; i < T.size(); i++){
                 vector<set<int>> tMinus = removeCondition(T, i);
                 if(subsetEq(subsetIntersection(tMinus), B)){
@@ -214,6 +234,9 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
             }
         }
 
+        #if DEBUG == true
+            cout << ".";
+        #endif
         // Add to local coverings
         LC.push_back(T);
         LC_indices.push_back(T_indices);
