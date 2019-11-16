@@ -76,18 +76,17 @@ bool Executive::generateOutFile(string filename){
         return false;
     }
 
-    // Generate attribute-value blocks
+    // Generate program components
     generateAVBlocks();
-    
-    // Generate concepts
     vector <Concept *> concepts = generateConcepts();
 
-    // LOOP: For each concept
+    // FOR: Each concept, induce rules
     for(Concept * c : concepts){
-        vector<set<int>> ruleset = induceRules(m_avBlocks, c->block);
-        // LOOP: For each rule
+        vector<set<int>> ruleset = induceRules(m_avBlocks, c->getBlock());
+        // FOR: Each rule, print to file
         for(set<int> r : ruleset){
-            file << ruleString(r, c);
+            vector<int> classification = classifyRule(r, c);
+            file << ruleString(r, c, classification);
         }
         delete c;
     }
@@ -97,31 +96,31 @@ bool Executive::generateOutFile(string filename){
 }
 
 void Executive::generateAVBlocks(){
-    // LOOP: For each attribute (column)
+    // FOR: Each attribute (column)
     for(int col = 0; col < m_numAttributes; col++){
         string attr = m_data->getAttribute(col);
-        
+
         // IF: Attribute values are numeric
         if(m_data->getValue(1, col)->isNumeric()){
             float min = 0, max = 0;
             list<float> cutpoints = m_data->discretize(col, min, max);
 
-            // LOOP: For each cutpoint, create (empty) attribute-value blocks 
+            // FOR: Each cutpoint, create (empty) attribute-value blocks 
             for (float c : cutpoints){
                 m_avBlocks.push_back(new AVNumeric(attr, col, min, c));
                 m_avBlocks.push_back(new AVNumeric(attr, col, c, max));
             }
         }
-        // IF: Attribute values are symbolic
+        // ELSE: Attribute values are symbolic
         else {
             list<string> values = m_data->getPossibleValues(col);
 
-            // LOOP: For each value, create an (empty) attribute-value block
+            // FOR: Each value, create an (empty) attribute-value block
             for (string v : values){
                 m_avBlocks.push_back(new AVSymbolic(attr, col, v));
             }
         }
-    }
+    } // END FOR
 
     // Populate attribute-value blocks
     // LOOP: For each attribute-value block
@@ -147,14 +146,13 @@ vector<Concept *> Executive::generateConcepts(){
         concepts.push_back(new Concept(m_data->getDecision(), v));
     }
 
-    // LOOP: For each concept
+    // FOR: Each concept
     for(int i = 0; i < concepts.size(); i++){
-
-        // LOOP: For each case (row), add matching values to the block
+        // FOR: Each case (row), add matching values to the block
         for(int r = 1; r <= m_data->getNumCases(); r++){
             int c = m_numAttributes;
             string cellValue = m_data->getValue(r, c)->getStrValue();
-            if(concepts[i]->value == cellValue){
+            if(concepts[i]->getValue() == cellValue){
                 concepts[i]->addCase(r);
             }
         }
@@ -167,18 +165,18 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
     vector<vector<set<int>>> LC;
     vector<set<int>> LC_indices;
 
-    // LOOP: While G is non-empty
+    // WHILE: G is non-empty
     while(!G.empty()){
         vector<set<int>> T;
         set<int> T_indices;
         vector<set<int>> T_G;
         
-        // LOOP: For all attribute-value blocks
+        // FOR: All attribute-value blocks
         for(int i = 0; i < AV.size(); i++){
             T_G.push_back(setIntersection(AV[i]->getBlock(), G));
         }
 
-        // LOOP: While T is non-empty or T is not subsetEq to B
+        // WHILE: T is non-empty or T is not subsetEq to B
         while(T.empty() || !(subsetEq(subsetIntersection(T), B))){
             // Find optimal choice; Add it to T
             int choicePos = getOptimalChoice(AV, T_G);
@@ -198,7 +196,7 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
                     T_G[i] = setIntersection(AV[i]->getBlock(), G);
                 }
             }
-        }
+        } // END WHILE (INNER LOOP)
 
         if(T.size() > 1){
             // Remove unnecessary conditions
@@ -221,7 +219,7 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
             tIntersects.push_back(subsetIntersection(T));
         }
         G = setDifference(B, subsetUnion(tIntersects));
-    }
+    } // END WHILE (OUTER LOOP)
 
     // Remove unnecessary rules
     if(LC.size() > 1){
@@ -241,17 +239,47 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
     return LC_indices;
 }
 
-std::string Executive::ruleString(set<int> attributes, Concept * concept){
-    int index = 0;
+vector<int> Executive::classifyRule(set<int> rule, Concept * concept){
+    vector<int> ret;
+    vector<set<int>> cases;
+    
+    // FOR: Each attribute in the rule, add the block
+    for(int attribute : rule){
+        cases.push_back(m_avBlocks[attribute]->getBlock());
+    }
+
+    // Intersect all attribute blocks
+    set<int> matchLHS = subsetIntersection(cases);
+
+    // Intersect all attribute blocks with concept block
+    cases.push_back(concept->getBlock());
+    set<int> matchCase = subsetIntersection(cases);
+
+    ret.push_back(rule.size());         // push specificity
+    ret.push_back(matchCase.size());    // push strength
+    ret.push_back(matchLHS.size());     // push size
+
+    return ret;
+}
+
+std::string Executive::ruleString(set<int> rule, Concept * concept, vector<int> classSet){
     stringstream stream;
-    for(int a : attributes){
-        stream << m_avBlocks[a]->labelString();
-        if(index + 1 != attributes.size()){
+
+    // Print classification to string
+    stream << classSet.at(0) << ", " << classSet.at(1) << ", " << classSet.at(2) << endl;
+
+    // Print attributes to string
+    int index = 0;
+    for(int attribute : rule){
+        stream << m_avBlocks[attribute]->labelString();
+        if(index + 1 != rule.size()){
             stream << " & ";
         }
         index++;
     }
-    stream << " -> (" << concept->decision << ", " << concept->value << ")" << endl;
+
+    // Print decision to string
+    stream << " -> (" << concept->getDecision() << ", " << concept->getValue() << ")" << endl;
     return stream.str();
 }
 

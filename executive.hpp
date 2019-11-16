@@ -14,17 +14,8 @@
 #include "avNumeric.hpp"
 #include "avSymbolic.hpp"
 #include "dataset.hpp"
+#include "concept.hpp"
 #include <string>
-
-class Concept {
-public:
-    Concept(string d, string v) : decision(d), value(v) {}
-    void addCase(int c){ block.insert(c); }
-
-    string decision;
-    string value;
-    set<int> block;
-};
 
 class Executive {
 public:
@@ -48,9 +39,13 @@ public:
 
     /* Generate ruleset using MLEM2. */
     std::vector<std::set<int>> induceRules(std::vector<AV *> AV, std::set<int> B);
+
+    /* Generates the set (Specificity, Strength, Size) for a rule).
+       @returns Vector of classifications in order. */
+    std::vector<int> classifyRule(std::set<int> rule, Concept * concept);
     
     /* Prints a single rule in (a, v) -> (d, v) format. */
-    std::string ruleString(std::set<int> attributes, Concept * decision);
+    std::string ruleString(std::set<int> rule, Concept * concept, std::vector<int> classSet);
 
 private:
     Dataset * m_data;
