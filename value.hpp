@@ -9,6 +9,7 @@
 #define VALUE_H
 #include <string>
 #include <sstream>
+#include <iostream>
 
 using namespace std;
 
@@ -19,16 +20,16 @@ enum Type {
 class Value {
 public:
     Value(string strValue) : m_strValue(strValue) {
-        if(isRange()){
+        stringstream stream (strValue);
+        stream >> m_numValue;
+        if (stream.fail()) {
             m_type = SYMBOLIC;
         } else {
-            stringstream stream (strValue);
-            stream >> m_numValue;
-            if (stream.fail()) {
+            if(isRange(strValue)){
                 m_type = SYMBOLIC;
-            } else {
-                m_type = NUMERIC;
-            }
+                cout << strValue << " is range" << endl;
+            } 
+            m_type = NUMERIC;
         }
     }
     string getStrValue() const{
@@ -43,8 +44,8 @@ public:
         }
         return false;
     }
-    bool isRange() const {
-        size_t pos = m_strValue.find("-");
+    bool isRange(std::string str) const {
+        size_t pos = str.find("-");
         
         // Dash is found in string
         if(pos != string::npos){
