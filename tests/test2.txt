@@ -1,0 +1,10 @@
+< a a a d >
+[ Size Ink-color Body-color Attitude ]
+small blue blue positive
+large blue black negative
+large red blue positive
+small black blue negative! From 09-12-2019 lecture
+large black blue negative
+large blue blue positive
+large black black negative
+small blue black negative

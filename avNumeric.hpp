@@ -42,8 +42,8 @@ public:
     std::string labelString() const {
         stringstream stream;
         stream << "(" << m_attr << ", ";
-        stream << setprecision(3) << m_minValue << "..";
-        stream << setprecision(3) << m_maxValue << ")";
+        stream << setprecision(8) << m_minValue << "..";
+        stream << setprecision(8) << m_maxValue << ")";
         return stream.str();
     }
 private:

@@ -192,16 +192,18 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
         for(unsigned i = 0; i < AV.size(); i++){
             T_G.push_back(setIntersection(AV[i]->getBlock(), G));
         }
-
-        #if DEBUG == true 
-            printList("T = ", T);
-        #endif
-
+        
         // Select conditions for rule
         // WHILE: T is non-empty or T is not subsetEq to B
-        while(T.empty() || !(subsetEq(subsetIntersection(T), B))){
+        while( (T.empty()) || !(subsetEq(subsetIntersection(T), B)) ){
             #if DEBUG == true
-                cout << "*";
+                set<int> intersect = subsetIntersection(T);
+                printSet("[T] = ", intersect);
+                if(subsetEq(intersect, B)){
+                    cout << "[T] <= B" << endl;
+                } else {
+                    cout << "[T] > B" << endl;
+                }
             #endif
             // Find optimal choice; Add it to T
             int choicePos = getOptimalChoice(AV, T_G);

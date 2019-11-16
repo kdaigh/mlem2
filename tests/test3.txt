@@ -1,0 +1,11 @@
+! From Homework 2
+< a a a a d >
+[ Size Color Feel Temperature Attitude ]
+big yellow soft low positive
+big yellow hard high negative
+medium yellow soft high positive
+medium blue hard high so-so
+medium blue hard high so-so
+medium blue soft low negative
+big blue hard low so-so
+big blue hard high so-so

@@ -1,0 +1,8 @@
+2, 1, 1
+(Color, yellow) & (Feel, hard) -> (Attitude, negative)
+3, 1, 1
+(Size, medium) & (Feel, soft) & (Temperature, low) -> (Attitude, negative)
+2, 2, 2
+(Color, yellow) & (Feel, soft) -> (Attitude, positive)
+2, 4, 4
+(Color, blue) & (Feel, hard) -> (Attitude, so-so)

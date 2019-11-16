@@ -1,0 +1,8 @@
+1, 3, 3
+(Ink-color, black) -> (Attitude, negative)
+1, 3, 3
+(Body-color, black) -> (Attitude, negative)
+2, 2, 2
+(Ink-color, blue) & (Body-color, blue) -> (Attitude, positive)
+1, 1, 1
+(Ink-color, red) -> (Attitude, positive)

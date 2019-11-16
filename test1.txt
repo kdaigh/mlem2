@@ -1,3 +1,4 @@
+! From 09-19-2019 Lecture
 < a a a d >
 [ Wind Humidity Temperature Trip ]
 4 low medium yes
