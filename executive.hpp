@@ -59,7 +59,8 @@ private:
     void parseHeader(std::istream& file);
 
     /* parseFile HELPER: Removes comments. */
-    std::string removeComments(std::string str);
+    std::string removeComments(std::istream & file);
+    //std::string removeComments(std::string str);
 
     /* induceRules HELPER: Finds the position of the best choice attribute-value pair. */
     int getOptimalChoice(std::vector<AV *> AV, std::vector<std::set<int>> T_G);

@@ -49,10 +49,15 @@ bool Executive::parseInFile(string filename) {
     string word;
     unsigned col = 0;
     while(file >> word){
+        // IF: col is at last column, reset col
         if(col == m_numAttributes + 1){
             col = 0;
         }
-        word = removeComments(word);
+        if(word.find('!') != string::npos){
+            word = word.erase('!');
+            string comment;
+            getline(file, comment, '\n');
+        }
         if(!word.empty()){
             m_data->addValue(col, word);
         }
@@ -289,15 +294,13 @@ void Executive::parseFormat(istream& file){
         return;
     }
 
-    string str;
-    getline(file, str);
-    str = removeComments(str);
-    size_t beg = str.find('<');
-    size_t end = str.find('>');
+    string line = removeComments(file);
+    size_t beg = line.find('<');
+    size_t end = line.find('>');
     if(beg != string::npos && end != string::npos){
-        str = str.substr(beg + 1, end);
+        line = line.substr(beg + 1, end);
     }
-    for(char& c : str) {
+    for(char& c : line) {
         if(c == 'a'){
             m_numAttributes++;
         }
@@ -310,13 +313,15 @@ void Executive::parseHeader(istream& file){
         return;
     }
 
-    string str, word;
-    file.ignore(MAX_STREAM, '[');
-    file.ignore(MAX_STREAM, ' ');
-    getline(file, str, ']');
-    str = removeComments(str);
+    string line = removeComments(file);
+    size_t beg = line.find('[');
+    size_t end = line.find(']');
+    if(beg != string::npos && end != string::npos){
+        line = line.substr(beg + 1, end);
+    }
 
-    istringstream buffer(str);
+    string word;
+    istringstream buffer(line);
     for(unsigned i = 0; i < m_numAttributes; i++){
         buffer >> word;
         m_data->addAttribute(word);      
@@ -325,12 +330,24 @@ void Executive::parseHeader(istream& file){
     m_data->setDecision(word);
 }
 
-string Executive::removeComments(string str){
-    size_t pos = str.find('!');
-    if(pos != string::npos){
-        str.erase(pos);
+string Executive::removeComments(istream & file){
+    string line;
+    getline(file, line);
+    size_t pos = line.find('!');
+    // WHILE: Line contains comment
+    while(pos != string::npos){
+        // IF: Entire line is comment
+        if(line.find('!') == 0){
+            getline(file, line);
+            pos = line.find('!');
+        }
+        // ELSE: Comment is at the end of line
+        else {
+            line.erase('!');
+            pos = string::npos;
+        }
     }
-    return str;
+    return line;
 }
 
 int Executive::getOptimalChoice(vector<AV *> AV, vector<set<int>> T_G){
