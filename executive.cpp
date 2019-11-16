@@ -28,7 +28,7 @@ Executive::Executive(){
 
 Executive::~Executive(){
     delete m_data;
-    for(int i = 0; i < m_avBlocks.size(); i++){
+    for(unsigned i = 0; i < m_avBlocks.size(); i++){
         delete m_avBlocks[i];
     }
 }
@@ -47,7 +47,7 @@ bool Executive::parseInFile(string filename) {
     parseHeader(file);
 
     string word;
-    int col = 0;
+    unsigned col = 0;
     while(file >> word){
         if(col == m_numAttributes + 1){
             col = 0;
@@ -97,7 +97,7 @@ bool Executive::generateOutFile(string filename){
 
 void Executive::generateAVBlocks(){
     // FOR: Each attribute (column)
-    for(int col = 0; col < m_numAttributes; col++){
+    for(unsigned col = 0; col < m_numAttributes; col++){
         string attr = m_data->getAttribute(col);
 
         // IF: Attribute values are numeric
@@ -124,10 +124,10 @@ void Executive::generateAVBlocks(){
 
     // Populate attribute-value blocks
     // LOOP: For each attribute-value block
-    for(int i = 0; i < m_avBlocks.size(); i++){
+    for(unsigned i = 0; i < m_avBlocks.size(); i++){
 
         // LOOP: For each case (row), add matching values to the block
-        for(int r = 1; r <= m_data->getNumCases(); r++){
+        for(unsigned r = 1; r <= m_data->getNumCases(); r++){
             int c = m_avBlocks[i]->getAttrCol();
             
             m_avBlocks[i]->addOnMatch(m_data->getValue(r, c), r);    
@@ -147,9 +147,9 @@ vector<Concept *> Executive::generateConcepts(){
     }
 
     // FOR: Each concept
-    for(int i = 0; i < concepts.size(); i++){
+    for(unsigned i = 0; i < concepts.size(); i++){
         // FOR: Each case (row), add matching values to the block
-        for(int r = 1; r <= m_data->getNumCases(); r++){
+        for(unsigned r = 1; r <= m_data->getNumCases(); r++){
             int c = m_numAttributes;
             string cellValue = m_data->getValue(r, c)->getStrValue();
             if(concepts[i]->getValue() == cellValue){
@@ -172,7 +172,7 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
         vector<set<int>> T_G;
         
         // FOR: All attribute-value blocks
-        for(int i = 0; i < AV.size(); i++){
+        for(unsigned i = 0; i < AV.size(); i++){
             T_G.push_back(setIntersection(AV[i]->getBlock(), G));
         }
 
@@ -187,7 +187,7 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
             G = setIntersection(AV[choicePos]->getBlock(), G);
                 
             // Update intersections
-            for(int i = 0; i < AV.size(); i++){
+            for(unsigned i = 0; i < AV.size(); i++){
                 set<int> coveredCases = subsetIntersection(T);
                 if(subsetEq(coveredCases, AV[i]->getBlock())){
                     T_G[i].clear();
@@ -200,7 +200,7 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
 
         if(T.size() > 1){
             // Remove unnecessary conditions
-            for(int i = 0; i < T.size(); i++){
+            for(unsigned i = 0; i < T.size(); i++){
                 vector<set<int>> tMinus = removeCondition(T, i);
                 if(subsetEq(subsetIntersection(tMinus), B)){
                     T = tMinus;
@@ -223,7 +223,7 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
 
     // Remove unnecessary rules
     if(LC.size() > 1){
-        for(int i = 0; i < LC.size(); i++){
+        for(unsigned i = 0; i < LC.size(); i++){
             vector<vector<set<int>>> lcMinus = removeRule(LC, i);
 
             vector<set<int>> tIntersects; 
@@ -269,7 +269,7 @@ std::string Executive::ruleString(set<int> rule, Concept * concept, vector<int> 
     stream << classSet.at(0) << ", " << classSet.at(1) << ", " << classSet.at(2) << endl;
 
     // Print attributes to string
-    int index = 0;
+    unsigned index = 0;
     for(int attribute : rule){
         stream << m_avBlocks[attribute]->labelString();
         if(index + 1 != rule.size()){
@@ -317,7 +317,7 @@ void Executive::parseHeader(istream& file){
     str = removeComments(str);
 
     istringstream buffer(str);
-    for(int i = 0; i < m_numAttributes; i++){
+    for(unsigned i = 0; i < m_numAttributes; i++){
         buffer >> word;
         m_data->addAttribute(word);      
     }
@@ -335,10 +335,11 @@ string Executive::removeComments(string str){
 
 int Executive::getOptimalChoice(vector<AV *> AV, vector<set<int>> T_G){
     std::list<int> maxSizePos;
-    int maxSize = 0, minCard = INT_MAX, pos = 0;
+    size_t maxSize = 0;
+    int minCard = INT_MAX, pos = 0;
 
     // LOOP: For each set intersection
-    for(int i = 0; i < T_G.size(); i++){
+    for(unsigned i = 0; i < T_G.size(); i++){
         // IF: Set is non-empty
         if(!(T_G[i].empty())){
             // IF: Current size is larger than maxSize, clear list and add index

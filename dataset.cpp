@@ -23,7 +23,7 @@ Dataset::Dataset(const int cols) : m_cols(cols) {
 
 Dataset::~Dataset() {
     delete[] m_attributes;
-    for(int i = 0; i < m_values->getNumCols(); i++){
+    for(unsigned i = 0; i < m_values->getNumCols(); i++){
         for(Value * v : (m_values->m_array[i])){
             delete v;
         }
@@ -83,7 +83,7 @@ list<float> Dataset::discretize(int col, float & min, float & max){
     // Convert numeric column to sorted list with no duplicates
     list<float> nums;
     vector<Value *> casesCol = m_values->getCol(col);
-    for(int i = 0; i < casesCol.size(); i++){
+    for(unsigned i = 0; i < casesCol.size(); i++){
         nums.push_back(casesCol[i]->getNumValue());
     }
     nums.sort();
@@ -112,7 +112,7 @@ list<float> Dataset::discretize(int col, float & min, float & max){
 list<string> Dataset::getPossibleValues(int col){
     list<string> vals;
     vector<Value *> casesCol = m_values->getCol(col);
-    for(int i = 0; i < casesCol.size(); i++){
+    for(unsigned i = 0; i < casesCol.size(); i++){
         vals.push_back(casesCol[i]->getStrValue());
     }
     vals.sort();
@@ -125,7 +125,7 @@ void Dataset::print() const {
         cout << m_attributes[i] << "\t";
     }
     cout << m_decision << endl;
-    for(int r = 1; r <= m_values->getNumRows(); r++){
+    for(unsigned r = 1; r <= m_values->getNumRows(); r++){
         for(int c = 0; c < m_cols; c++){
             cout << m_values->at(r, c)->getStrValue() << "\t";
         }

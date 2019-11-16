@@ -29,7 +29,7 @@ public:
             m_array[col].push_back(item);
         }
     }
-    T at(int row, int col) throw (out_of_range) {
+    T at(int row, int col){
         try {
             return m_array[col].at(row - m_offset);
         } catch (out_of_range){

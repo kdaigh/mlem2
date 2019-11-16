@@ -37,7 +37,7 @@ std::set<int> setIntersection(std::set<int> setA, std::set<int> setB){
 
 std::set<int> subsetIntersection(std::vector<std::set<int>> subsets){
     std::set<int> intersectSet = subsets[0];
-    for(int i = 1; i < subsets.size(); i++){
+    for(unsigned i = 1; i < subsets.size(); i++){
         std::set<int> & result = intersectSet;
         result = setIntersection(result, subsets[i]);
     }
@@ -54,7 +54,7 @@ std::set<int> setUnion(std::set<int> setA, std::set<int> setB){
 
 std::set<int> subsetUnion(std::vector<std::set<int>> subsets){
     std::set<int> unionSet = subsets[0];
-    for(int i = 1; i < subsets.size(); i++){
+    for(unsigned i = 1; i < subsets.size(); i++){
         std::set<int> & result = unionSet;
         result = setUnion(result, subsets[i]);
     }
