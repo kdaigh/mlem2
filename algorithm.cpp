@@ -215,6 +215,12 @@ std::string Algorithm::generateRuleset(Dataset * data){
     // Generate program components
     generateAVBlocks(data);
     vector <Concept *> concepts = generateConcepts(data);
+    #if DEBUG == true
+        for(Concept * concept : concepts){
+            cout << concept->toString() << endl;
+        }
+    #endif
+
 
     // FOR: Each concept, generate rules and print to stream
     for(Concept * concept : concepts){
@@ -242,7 +248,6 @@ std::string Algorithm::generateRuleset(Dataset * data){
 
             // Print decision to string
             stream << " -> (" << concept->getDecision() << ", " << concept->getValue() << ")" << endl;
-            return stream.str();
         }
         delete concept;
     }
