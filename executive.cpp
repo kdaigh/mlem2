@@ -13,7 +13,6 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#define DEBUG true
 
 using namespace std;
 
@@ -60,10 +59,6 @@ bool Executive::parseInFile(string filename) {
             col++;
         }  
     }
-
-    #if DEBUG == true
-        m_data->print();
-    #endif
 
     file.close();
     return true;
