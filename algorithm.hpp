@@ -32,10 +32,17 @@ public:
     /* Generate ruleset using MLEM2. */
     std::vector<std::set<int>> induceRules(std::vector<AV *> AV, std::set<int> B);
 
-    /* induceRules HELPER: Finds the position of the best choice attribute-value pair. */
+    /* Finds the position of the best attribute-value pair. */
     int getOptimalCondition(std::vector<AV *> AV, std::vector<std::set<int>> T_G);
 
+    /* Merges intervals for overlapping numeric attribute-value blocks. */
     void mergeIntervals(std::vector<std::set<int>> & T, std::set<int> & T_indices);
+
+    /* Drops conditions that are unnecessary for the rule. */
+    void dropConditions(std::vector<std::set<int>> & T, std::set<int> & T_indices);
+
+    /* Drops rules that are unnecessary for the ruleset. */
+    void dropRules(std::vector<std::vector<std::set<int>>> & LC, std::vector<std::set<int>> & LC_indices);
 
     /* induceRules HELPER: Remove a single condition from a rule.
        @post T param is not modified. */
