@@ -60,7 +60,6 @@ void Algorithm::generateAVBlocks(Dataset * data){
            m_avBlocks[i]->print();
         #endif
     }
-    m_numOrigBlocks = m_avBlocks.size();
 }
 
 vector<Concept *> Algorithm::generateConcepts(Dataset * data){
