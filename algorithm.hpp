@@ -35,7 +35,7 @@ public:
     /* induceRules HELPER: Finds the position of the best choice attribute-value pair. */
     int getOptimalCondition(std::vector<AV *> AV, std::vector<std::set<int>> T_G);
 
-    // simplifyInterval(vector<set<int>> & T, set<int> & T_indices);
+    void mergeIntervals(std::vector<std::set<int>> & T, std::set<int> & T_indices);
 
     /* induceRules HELPER: Remove a single condition from a rule.
        @post T param is not modified. */

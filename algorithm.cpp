@@ -215,12 +215,6 @@ std::string Algorithm::generateRuleset(Dataset * data){
     // Generate program components
     generateAVBlocks(data);
     vector <Concept *> concepts = generateConcepts(data);
-    #if DEBUG == true
-        for(Concept * concept : concepts){
-            cout << concept->toString() << endl;
-        }
-    #endif
-
 
     // FOR: Each concept, generate rules and print to stream
     for(Concept * concept : concepts){
@@ -297,6 +291,8 @@ int Algorithm::getOptimalCondition(vector<AV *> AV, vector<set<int>> T_G){
     // RETURN: Position with smallest cardinality or first occuring if tie
     return minCardPos.front();    
 }
+
+void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices);
 
 vector<set<int>> Algorithm::removeCondition(vector<set<int>> & T, int index){
     vector<set<int>> temp = T;
