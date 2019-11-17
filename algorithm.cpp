@@ -135,7 +135,7 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> AV, set<int> B){
         // Remove unnecessary conditions
         if(T.size() > 1){
             mergeIntervals(T, T_indices);
-            dropConditions(T, T_indices);
+            dropConditions(T, T_indices, B);
         }
 
         // Add to local coverings
@@ -152,7 +152,7 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> AV, set<int> B){
 
     // Remove unnecessary rules
     if(LC.size() > 1){
-        dropRules(LC, LC_indices);
+        dropRules(LC, LC_indices, B);
     }
     return LC_indices;
 }
@@ -314,7 +314,7 @@ void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices){
     }
 }
 
-void Algorithm::dropConditions(vector<set<int>> & T, set<int> & T_indices){
+void Algorithm::dropConditions(vector<set<int>> & T, set<int> & T_indices, set<int> B){
     for(unsigned i = 0; i < T.size(); i++){
         vector<set<int>> tMinus = removeCondition(T, i);
         if(subsetEq(subsetIntersection(tMinus), B)){
@@ -324,7 +324,7 @@ void Algorithm::dropConditions(vector<set<int>> & T, set<int> & T_indices){
     }
 }
 
-void Algorithm::dropRules(vector<vector<set<int>>> & LC, vector<set<int>> & LC_indices){
+void Algorithm::dropRules(vector<vector<set<int>>> & LC, vector<set<int>> & LC_indices, set<int> B){
     for(unsigned i = 0; i < LC.size(); i++){
         vector<vector<set<int>>> lcMinus = removeRule(LC, i);
 
