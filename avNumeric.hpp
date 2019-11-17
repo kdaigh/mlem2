@@ -25,6 +25,12 @@ public:
         m_minValue = minValue;
         m_maxValue = maxValue;
     }
+    int getMinValue() const {
+        return m_minValue;
+    }
+    int getMaxValue() const {
+        return m_maxValue;
+    }
     bool addOnMatch(Value * value, int x){
         if(value->getNumValue() >= m_minValue && value->getNumValue() <= m_maxValue){
             m_block.insert(x);
@@ -32,6 +38,21 @@ public:
         }
         return false;
     }
+    bool isNumeric() const {
+        return true;
+    }
+    // bool overlap(AV * block){
+    //     // IF: Overlap
+    //     if(m_maxValue > block->getMinValue() && block->getMaxValue() > m_minValue){
+    //         return true;
+    //     }
+    //     // IF: Overlap
+    //     else if(block->getMaxValue() > m_minValue && m_maxValue > block->getMinValue()){
+    //         return true;
+    //     }
+    //     // ELSE: No overlap
+    //     return false;
+    // }
     void print() const {
         cout << "[(" << m_attr << ", " << m_minValue << ".." << m_maxValue << ")] = {";
         for(int caseNo : m_block){

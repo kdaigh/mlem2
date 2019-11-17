@@ -28,6 +28,9 @@ public:
         }
         return false;
     }
+    bool isNumeric() const {
+        return false;
+    }
     void print() const {
         cout << "[(" << m_attr << ", " << m_value << ")] = {";
         for(int caseNo : m_block){

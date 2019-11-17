@@ -20,8 +20,20 @@ public:
     AV(string attr, int attrCol) 
         : m_attr(attr), m_attrCol(attrCol) { }
     virtual ~AV(){}
+
+    /* Gets the attribute string. */
+    virtual string getAttr() const {
+        return m_attr;
+    }
+
+    /* Gets the block set. */
     virtual set<int> getBlock() const {
         return m_block;
+    }
+    
+    /* Gets the size of the block set. */
+    virtual size_t size() const {
+        return m_block.size();
     }
 
     /* Returns the column number of the attribute */
@@ -33,10 +45,8 @@ public:
        @returns True if add is successful; False, otherwise. */
     virtual bool addOnMatch(Value * value, int x) = 0;
 
-    /* Gets the size of the block set. */
-    virtual size_t size() const {
-        return m_block.size();
-    }
+    /* TEMPLATE: Checks if block is numeric or symbolic. */
+    virtual bool isNumeric() const = 0;
 
     /* TEMPLATE: Outputs the attribute-value block. Used for debugging. */
     virtual void print() const = 0;
