@@ -10,6 +10,7 @@
 
 #include "algorithm.hpp"
 #include "setUtils.hpp"
+#include <algorithm>
 #include <limits.h>
 
 using namespace std;
@@ -130,20 +131,9 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> AV, set<int> B){
         } // END WHILE (INNER LOOP)
 
         // Remove unnecessary conditions (interval simplification)
-        // if(T.size() > 1){
-        //     for(unsigned i = 0; i < (T.size() - 1); i++){
-        //         // IF: Current and next attribute-value blocks are numeric
-        //         if(m_avBlocks[i]->isNumeric() && m_avBlocks[i + 1]->isNumeric()){
-        //             // IF: Current and next blocks have same attribute
-        //             if(m_avBlocks[i]->getAttr() == m_avBlocks[i + 1]->getAttr()){
-        //                 // IF: Intervals overlap
-        //                 // if(m_avBlocks[i]->overlap(m_avBlocks[i + 1])){
-        //                     cout << "check for overlap" << endl;
-        //                 // }   
-        //             }
-        //         }
-        //     }
-        // }
+        if(T.size() > 1){
+            mergeIntervals(T, T_indices);
+        }
 
         // Remove unnecessary conditions (linear dropping)
         if(T.size() > 1){
@@ -292,7 +282,43 @@ int Algorithm::getOptimalCondition(vector<AV *> AV, vector<set<int>> T_G){
     return minCardPos.front();    
 }
 
-void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices);
+void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices){
+    set<int>::iterator curIter = T_indices.begin();
+    set<int>::iterator nextIter = next(curIter);
+    while(nextIter != T_indices.end()){
+        bool increment = true;
+        AV * curBlock = m_avBlocks[(*curIter)];
+        AV * nextBlock = m_avBlocks[(*nextIter)];
+        // IF: Current and next attribute-value blocks are numeric
+        if(curBlock->isNumeric() && nextBlock->isNumeric()){
+            // IF: Current and next blocks have same attribute
+            if(curBlock->getAttr() == nextBlock->getAttr()){
+                int mergedMin = max(curBlock->getMinValue(), nextBlock->getMinValue());
+                int mergedMax = min(curBlock->getMaxValue(), nextBlock->getMaxValue());
+                
+                // If: Intervals overlap, merge intervals
+                if(mergedMax > mergedMin){
+                    for(unsigned j = 0; j < m_avBlocks.size(); j++){
+                        if(m_avBlocks[j]->getMinValue() == mergedMin && m_avBlocks[j]->getMaxValue() == mergedMax){
+                            T[(*curIter)] = m_avBlocks[j]->getBlock();
+                            T = removeCondition(T, (*nextIter));
+
+                            T_indices.erase((*curIter));
+                            T_indices.erase((*nextIter));
+                            T_indices.insert(j);
+                            increment = false;
+                        }
+                    }
+                }
+            }
+        }
+        // IF: Current block is unchanged, consider next
+        if(increment){
+            curIter = next(curIter);
+            nextIter = next(nextIter);
+        }
+    }
+}
 
 vector<set<int>> Algorithm::removeCondition(vector<set<int>> & T, int index){
     vector<set<int>> temp = T;

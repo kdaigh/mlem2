@@ -21,6 +21,9 @@ public:
         : m_attr(attr), m_attrCol(attrCol) { }
     virtual ~AV(){}
 
+    virtual int getMinValue() const { return -1; }
+    virtual int getMaxValue() const { return -1; }
+
     /* Gets the attribute string. */
     virtual string getAttr() const {
         return m_attr;

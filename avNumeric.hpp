@@ -41,18 +41,6 @@ public:
     bool isNumeric() const {
         return true;
     }
-    // bool overlap(AV * block){
-    //     // IF: Overlap
-    //     if(m_maxValue > block->getMinValue() && block->getMaxValue() > m_minValue){
-    //         return true;
-    //     }
-    //     // IF: Overlap
-    //     else if(block->getMaxValue() > m_minValue && m_maxValue > block->getMinValue()){
-    //         return true;
-    //     }
-    //     // ELSE: No overlap
-    //     return false;
-    // }
     void print() const {
         cout << "[(" << m_attr << ", " << m_minValue << ".." << m_maxValue << ")] = {";
         for(int caseNo : m_block){
