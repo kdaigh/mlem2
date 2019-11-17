@@ -286,13 +286,9 @@ void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices){
     unsigned i = 0;
     // WHILE: There are at least two elements to compare
     while(i < (T.size() - 1)){
-        set<int>::iterator curIter = next(T_indices.begin(), i);
-        set<int>::iterator nextIter = next(curIter);
-        #if DEBUG == true
-            printList("T = ", T);
-            printSet("T_indices = ", T_indices);
-        #endif
         bool increment = true;
+        set<int>::iterator curIter = next(T_indices.begin(), i);
+        set<int>::iterator nextIter = next(curIter);     
         AV * curBlock = m_avBlocks[(*curIter)];
         AV * nextBlock = m_avBlocks[(*nextIter)];
         // IF: Current and next attribute-value blocks are numeric
@@ -301,21 +297,32 @@ void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices){
             if(curBlock->getAttr() == nextBlock->getAttr()){
                 int mergedMin = max(curBlock->getMinValue(), nextBlock->getMinValue());
                 int mergedMax = min(curBlock->getMaxValue(), nextBlock->getMaxValue());
-                
                 // If: Intervals overlap, merge intervals
                 if(mergedMax > mergedMin){
+                    #if DEBUG == true
+                        cout << "Merging intervals to " << mergedMin << ".." << mergedMax << endl;
+                    #endif
+
+                    int pos = -1;
                     for(unsigned j = 0; j < m_avBlocks.size(); j++){
                         if(m_avBlocks[j]->getMinValue() == mergedMin && m_avBlocks[j]->getMaxValue() == mergedMax){
-                            T[i] = m_avBlocks[j]->getBlock();
-                            T = removeCondition(T, i + 1);
-
-                            T_indices.erase((*curIter));
-                            T_indices.erase((*nextIter));
-                            T_indices.insert(j);
-                            increment = false;
+                            pos = j;
                             break;
                         }
                     }
+
+                    // IF: Block does not already exist, create one
+                    if(pos == -1){
+                        pos = m_avBlocks.size();
+                        m_avBlocks.push_back(new AVNumeric(curBlock->getAttr(), -1, mergedMin, mergedMax));
+                        m_avBlocks[pos]->setBlock(setIntersection(curBlock->getBlock(), nextBlock->getBlock()));
+                    }
+                    T[i] = m_avBlocks[pos]->getBlock();
+                    T = removeCondition(T, i + 1);
+                    T_indices.erase((*curIter));
+                    T_indices.erase((*nextIter));
+                    T_indices.insert(pos);
+                    increment = false;
                 }
             }
         }

@@ -43,6 +43,10 @@ public:
     virtual int getAttrCol() const {
         return m_attrCol;
     }
+
+    virtual void setBlock(set<int> block) {
+        m_block = block;
+    }
     
     /* TEMPLATE: Adds if value of block and specified case match.
        @returns True if add is successful; False, otherwise. */
