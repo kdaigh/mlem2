@@ -97,6 +97,7 @@ bool Executive::generateOutFile(string filename){
         #endif
         
         vector<set<int>> ruleset = induceRules(m_avBlocks, c->getBlock());
+        printList("Ruleset = ", ruleset);
         // FOR: Each rule, print to file
         for(set<int> r : ruleset){
             vector<int> classification = classifyRule(r, c);
@@ -196,19 +197,22 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
         // Select conditions for rule
         // WHILE: T is non-empty or T is not subsetEq to B
         while( (T.empty()) || !(subsetEq(subsetIntersection(T), B)) ){
-            #if DEBUG == true
-                set<int> intersect = subsetIntersection(T);
-                printSet("[T] = ", intersect);
-                if(subsetEq(intersect, B)){
-                    cout << "[T] <= B" << endl;
-                } else {
-                    cout << "[T] > B" << endl;
-                }
-            #endif
+            // #if DEBUG == true
+            //     set<int> intersect = subsetIntersection(T);
+            //     printSet("[T] = ", intersect);
+            //     if(subsetEq(intersect, B)){
+            //         cout << "[T] <= B" << endl;
+            //     } else {
+            //         cout << "[T] > B" << endl;
+            //     }
+            // #endif
+
             // Find optimal choice; Add it to T
             int choicePos = getOptimalChoice(AV, T_G);
             T.push_back(AV[choicePos]->getBlock());
             T_indices.insert(choicePos);
+
+            printSet("T_indices = ", T_indices);
 
             // Update goal set
             G = setIntersection(AV[choicePos]->getBlock(), G);
@@ -236,9 +240,6 @@ vector<set<int>> Executive::induceRules(vector<AV *> AV, set<int> B){
             }
         }
 
-        #if DEBUG == true
-            cout << ".";
-        #endif
         // Add to local coverings
         LC.push_back(T);
         LC_indices.push_back(T_indices);
@@ -376,7 +377,7 @@ string Executive::removeComments(istream & file){
 }
 
 int Executive::getOptimalChoice(vector<AV *> AV, vector<set<int>> T_G){
-    std::list<int> maxSizePos;
+    std::list<int> maxSizePos, minCardPos;
     size_t maxSize = 0, minCard = INT_MAX;
     int pos = 0;
 
@@ -408,15 +409,16 @@ int Executive::getOptimalChoice(vector<AV *> AV, vector<set<int>> T_G){
             // IF: Current cardinality is smaller than minCard, update minCard
             if(AV[i]->size() < minCard){
                 minCard = AV[i]->size();
-                pos = i;
+                minCardPos.clear();
+                minCardPos.push_back(i);
             // IF: Current size is equal to minCard, cardinality is not unique
             } else if (AV[i]->size() == minCard){
-                break;
+                minCardPos.push_back(i);
             }
         }
     }
     // RETURN: Position with smallest cardinality or first occuring if tie
-    return pos;     
+    return minCardPos.front();    
 }
 
 vector<set<int>> Executive::removeCondition(vector<set<int>> & T, int index){
