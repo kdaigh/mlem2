@@ -26,9 +26,6 @@ Executive::Executive(){
 
 Executive::~Executive(){
     delete m_data;
-    for(unsigned i = 0; i < m_avBlocks.size(); i++){
-        delete m_avBlocks[i];
-    }
 }
 
 bool Executive::parseInFile(string filename) {
