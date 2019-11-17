@@ -284,9 +284,14 @@ int Algorithm::getOptimalCondition(vector<AV *> AV, vector<set<int>> T_G){
 
 void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices){
     unsigned i = 0;
-    set<int>::iterator curIter = T_indices.begin();
-    set<int>::iterator nextIter = next(curIter);
-    while(nextIter != T_indices.end()){
+    // WHILE: There are at least two elements to compare
+    while(i < (T.size() - 1)){
+        set<int>::iterator curIter = next(T_indices.begin(), i);
+        set<int>::iterator nextIter = next(curIter);
+        #if DEBUG == true
+            printList("T = ", T);
+            printSet("T_indices = ", T_indices);
+        #endif
         bool increment = true;
         AV * curBlock = m_avBlocks[(*curIter)];
         AV * nextBlock = m_avBlocks[(*nextIter)];
@@ -308,6 +313,7 @@ void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices){
                             T_indices.erase((*nextIter));
                             T_indices.insert(j);
                             increment = false;
+                            break;
                         }
                     }
                 }
@@ -315,8 +321,6 @@ void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices){
         }
         // IF: Current block is unchanged, consider next
         if(increment){
-            curIter = next(curIter);
-            nextIter = next(nextIter);
             i++;
         }
     }
