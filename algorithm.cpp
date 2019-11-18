@@ -142,6 +142,11 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
             dropConditions(T, T_indices, B);
         }
 
+        #if DEBUG == true
+            printSet("REDUCED\nT_indices = ", T_indices);
+            printList("T = ", T);
+        #endif
+
         // Add to local coverings
         if(T.size() > 0){
             LC.push_back(T);
@@ -321,9 +326,6 @@ void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices){
             i++;
         }
     }
-    #if DEBUG == true
-        printList("Merge T = ", T);
-    #endif
 }
 
 void Algorithm::dropConditions(vector<set<int>> & T, set<int> & T_indices, set<int> B){
