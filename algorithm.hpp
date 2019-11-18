@@ -36,21 +36,21 @@ public:
     int getOptimalCondition(std::vector<AV *> AV, std::vector<std::set<int>> T_G);
 
     /* Merges intervals for overlapping numeric attribute-value blocks. */
-    std::vector<std::set<int>> mergeIntervals(std::vector<std::set<int>> T, std::set<int> & T_indices);
+    void mergeIntervals(std::vector<std::set<int>> & T, std::set<int> & T_indices);
 
     /* Drops conditions that are unnecessary for the rule. */
-    std::vector<std::set<int>> dropConditions(std::vector<std::set<int>> T, std::set<int> & T_indices, std::set<int> B);
+    void dropConditions(std::vector<std::set<int>> & T, std::set<int> & T_indices, std::set<int> B);
 
     /* Drops rules that are unnecessary for the ruleset. */
-    std::vector<std::vector<std::set<int>>> dropRules(std::vector<std::vector<std::set<int>>> LC, std::vector<std::set<int>> & LC_indices, std::set<int> B);
+    void dropRules(std::vector<std::vector<std::set<int>>> & LC, std::vector<std::set<int>> & LC_indices, std::set<int> B);
 
     /* induceRules HELPER: Remove a single condition from a rule.
        @post T param is not modified. */
-    std::vector<std::set<int>> removeCondition(std::vector<std::set<int>> & T, int index);
+    std::vector<std::set<int>> removeCondition(const std::vector<std::set<int>> & T, int index);
     
     /* induceRules HELPER: Remove a single rule from a covering.
        @post T param is not modified. */
-    std::vector<std::vector<std::set<int>>> removeRule(std::vector<std::vector<std::set<int>>> & T, int index);
+    std::vector<std::vector<std::set<int>>> removeRule(const std::vector<std::vector<std::set<int>>> & T, int index);
 
     /* Generates the set (Specificity, Strength, Size) for a rule).
        @returns Vector of classifications in order. */

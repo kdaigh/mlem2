@@ -15,11 +15,11 @@ std::set<int> setDifference(std::set<int> setA, std::set<int> setB){
     if(setA.empty() || setB.empty()){
         return setA;
     }
-    std::set<int> diffSet;
+    std::set<int> result;
     std::set_difference(setA.begin(), setA.end(),
                         setB.begin(), setB.end(),
-                        std::inserter(diffSet, diffSet.begin()));
-    return diffSet;
+                        std::inserter(result, result.begin()));
+    return result;
 }
 
 std::set<int> setIntersection(std::set<int> setA, std::set<int> setB){
@@ -28,14 +28,14 @@ std::set<int> setIntersection(std::set<int> setA, std::set<int> setB){
     } else if(setA.empty()){
         return setA;
     }
-    std::set<int> intersectSet;
+    std::set<int> result;
     std::set_intersection(setA.begin(), setA.end(),
                           setB.begin(), setB.end(),
-                          std::inserter(intersectSet, intersectSet.begin()));
-    return intersectSet;
+                          std::inserter(result, result.begin()));
+    return result;
 }
 
-std::set<int> setsIntersection(std::vector<std::set<int>> & sets){
+std::set<int> setsIntersection(std::vector<std::set<int>> sets){
     set<int> result;
     if(sets.empty()){
         return result;
@@ -44,7 +44,14 @@ std::set<int> setsIntersection(std::vector<std::set<int>> & sets){
         return sets[0];
     }
 
-    result = sets[0];
+    set_intersection(sets[0].begin(), sets[0].end(),
+                     sets[1].begin(), sets[1].end(),
+                     std::inserter(result, result.begin()));
+    
+    if(sets.size() == 2){
+        return result;
+    }
+
     set<int> buffer;    
     for(unsigned i = 2; i < sets.size(); i++){
         buffer.clear();
@@ -63,14 +70,14 @@ std::set<int> setUnion(std::set<int> setA, std::set<int> setB){
     } else if(setA.empty()){
         return setB;
     }
-    std::set<int> unionSet;
+    std::set<int> result;
     std::set_union(setA.begin(), setA.end(),
                    setB.begin(), setB.end(),
-                   std::inserter(unionSet, unionSet.begin()));
-    return unionSet;
+                   std::inserter(result, result.begin()));
+    return result;
 }
 
-std::set<int> setsUnion(std::vector<std::set<int>> & sets){
+std::set<int> setsUnion(std::vector<std::set<int>> sets){
     set<int> result;
     if(sets.empty()){
         return result;
@@ -79,14 +86,21 @@ std::set<int> setsUnion(std::vector<std::set<int>> & sets){
         return sets[0];
     }
 
-    result = sets[0];
+    set_union(sets[0].begin(), sets[0].end(),
+              sets[1].begin(), sets[1].end(),
+              std::inserter(result, result.begin()));
+    
+    if(sets.size() == 2){
+        return result;
+    }
+
     set<int> buffer;    
-    for(unsigned i = 1; i < sets.size(); i++){
+    for(unsigned i = 2; i < sets.size(); i++){
         buffer.clear();
 
-        std::set_union(result.begin(), result.end(),
-                       sets[i].begin(), sets[i].end(),
-                       std::inserter(buffer, buffer.begin()));
+        set_union(result.begin(), result.end(),
+                  sets[i].begin(), sets[i].end(),
+                  std::inserter(buffer, buffer.begin()));
         swap(result, buffer);
     }
     return result;

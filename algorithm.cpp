@@ -8,6 +8,7 @@
     This class handles the execution
     of the MLEM2 algorithm. */
 
+
 #include "algorithm.hpp"
 #include "setUtils.hpp"
 #include <algorithm>
@@ -83,11 +84,11 @@ vector<Concept *> Algorithm::generateConcepts(Dataset * data){
     return concepts;
 }
 
-vector<set<int>> Algorithm::induceRules(vector<AV *> AV, set<int> B){
+vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
     set<int> G = B;
     vector<vector<set<int>>> LC;
     vector<set<int>> LC_indices;
-    size_t numOrigBlocks = AV.size();
+    size_t numOrigBlocks = av.size();
 
     // WHILE: G is non-empty
     while(!G.empty()){
@@ -101,29 +102,29 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> AV, set<int> B){
         
         // FOR: All attribute-value blocks
         for(unsigned i = 0; i < numOrigBlocks; i++){
-            T_G.push_back(setIntersection(AV[i]->getBlock(), G));
+            T_G.push_back(setIntersection(av[i]->getBlock(), G));
         }
         
         // Select conditions for rule
         // WHILE: T is non-empty or T is not subsetEq to B
         while( (T.empty()) || !(subsetEq(setsIntersection(T), B)) ){
             // Find optimal choice; Add it to T
-            int choicePos = getOptimalCondition(AV, T_G);
-            T.push_back(AV[choicePos]->getBlock());
+            int choicePos = getOptimalCondition(av, T_G);
+            T.push_back(av[choicePos]->getBlock());
             T_indices.insert(choicePos);
                 
             // Update goal set
-            G = setIntersection(AV[choicePos]->getBlock(), G);
+            G = setIntersection(av[choicePos]->getBlock(), G);
                 
             // Update intersections
             // FOR: Each attribute-value block
             for(unsigned i = 0; i < numOrigBlocks; i++){
                 set<int> coveredCases = setsIntersection(T);
-                if(subsetEq(coveredCases, AV[i]->getBlock())){
+                if(subsetEq(coveredCases, av[i]->getBlock())){
                     T_G[i].clear();
                 }
                 else {
-                    T_G[i] = setIntersection(AV[i]->getBlock(), G);
+                    T_G[i] = setIntersection(av[i]->getBlock(), G);
                 }
             }
         } // END WHILE (INNER LOOP)
@@ -135,14 +136,11 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> AV, set<int> B){
 
         // Remove unnecessary conditions
         if(T.size() > 1){
-            T = mergeIntervals(T, T_indices);
-            T = dropConditions(T, T_indices, B);
+            mergeIntervals(T, T_indices);
         }
-
-        #if DEBUG == true
-            printSet("(Reduced) T_indices = ", T_indices);
-            printList("T = ", T);
-        #endif
+        if(T.size() > 1){
+            dropConditions(T, T_indices, B);
+        }
 
         // Add to local coverings
         if(T.size() > 0){
@@ -163,7 +161,7 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> AV, set<int> B){
 
     // Remove unnecessary rules
     if(LC.size() > 1){
-        LC = dropRules(LC, LC_indices, B);
+        dropRules(LC, LC_indices, B);
     }
     return LC_indices;
 }
@@ -230,7 +228,7 @@ std::string Algorithm::generateRuleset(Dataset * data){
     return stream.str();
 }
 
-int Algorithm::getOptimalCondition(vector<AV *> AV, vector<set<int>> T_G){
+int Algorithm::getOptimalCondition(vector<AV *> av, vector<set<int>> T_G){
     std::list<int> maxSizePos, minCardPos;
     size_t maxSize = 0, minCard = INT_MAX;
 
@@ -260,12 +258,12 @@ int Algorithm::getOptimalCondition(vector<AV *> AV, vector<set<int>> T_G){
         // IF: Set is non-empty
         if(!(T_G[i].empty())){
             // IF: Current cardinality is smaller than minCard, update minCard
-            if(AV[i]->size() < minCard){
-                minCard = AV[i]->size();
+            if(av[i]->size() < minCard){
+                minCard = av[i]->size();
                 minCardPos.clear();
                 minCardPos.push_back(i);
             // IF: Current size is equal to minCard, cardinality is not unique
-            } else if (AV[i]->size() == minCard){
+            } else if (av[i]->size() == minCard){
                 minCardPos.push_back(i);
             }
         }
@@ -274,7 +272,7 @@ int Algorithm::getOptimalCondition(vector<AV *> AV, vector<set<int>> T_G){
     return minCardPos.front();    
 }
 
-vector<set<int>> Algorithm::mergeIntervals(vector<set<int>> T, set<int> & T_indices){
+void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices){
     unsigned i = 0;
     // WHILE: There are at least two elements to compare
     while(i < (T.size() - 1)){
@@ -323,10 +321,12 @@ vector<set<int>> Algorithm::mergeIntervals(vector<set<int>> T, set<int> & T_indi
             i++;
         }
     }
-    return T;
+    #if DEBUG == true
+        printList("Merge T = ", T);
+    #endif
 }
 
-vector<set<int>> Algorithm::dropConditions(vector<set<int>> T, set<int> & T_indices, set<int> B){
+void Algorithm::dropConditions(vector<set<int>> & T, set<int> & T_indices, set<int> B){
     for(unsigned i = 0; i < T.size(); i++){
         vector<set<int>> tMinus = removeCondition(T, i);
         if(subsetEq(setsIntersection(tMinus), B)){
@@ -334,10 +334,9 @@ vector<set<int>> Algorithm::dropConditions(vector<set<int>> T, set<int> & T_indi
             T_indices.erase(i);
         }
     }
-    return T;
 }
 
-vector<vector<set<int>>> Algorithm::dropRules(vector<vector<set<int>>> LC, vector<set<int>> & LC_indices, set<int> B){
+void Algorithm::dropRules(vector<vector<set<int>>> & LC, vector<set<int>> & LC_indices, set<int> B){
     for(unsigned i = 0; i < LC.size(); i++){
         vector<vector<set<int>>> lcMinus = removeRule(LC, i);
 
@@ -350,16 +349,15 @@ vector<vector<set<int>>> Algorithm::dropRules(vector<vector<set<int>>> LC, vecto
             LC_indices.erase(LC_indices.begin() + i);
         }
     }
-    return LC;
 }
 
-vector<set<int>> Algorithm::removeCondition(vector<set<int>> & T, int index){
+vector<set<int>> Algorithm::removeCondition(const vector<set<int>> & T, int index){
     vector<set<int>> temp = T;
     temp.erase(temp.begin() + index);
     return temp;
 }
 
-vector<vector<set<int>>> Algorithm::removeRule(vector<vector<set<int>>> & T, int index){
+vector<vector<set<int>>> Algorithm::removeRule(const vector<vector<set<int>>> & T, int index){
     vector<vector<set<int>>> temp = T;
     temp.erase(temp.begin() + index);
     return temp;

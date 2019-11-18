@@ -17,6 +17,7 @@ using namespace std;
 
 class AV {
 public:
+    AV(){}
     AV(string attr, int attrCol) 
         : m_attr(attr), m_attrCol(attrCol) { }
     virtual ~AV(){}
