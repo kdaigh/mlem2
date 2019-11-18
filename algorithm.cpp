@@ -106,7 +106,7 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> AV, set<int> B){
         
         // Select conditions for rule
         // WHILE: T is non-empty or T is not subsetEq to B
-        while( (T.empty()) || !(subsetEq(listIntersection(T), B)) ){
+        while( (T.empty()) || !(subsetEq(setsIntersection(T), B)) ){
             // Find optimal choice; Add it to T
             int choicePos = getOptimalCondition(AV, T_G);
             T.push_back(AV[choicePos]->getBlock());
@@ -118,7 +118,7 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> AV, set<int> B){
             // Update intersections
             // FOR: Each attribute-value block
             for(unsigned i = 0; i < numOrigBlocks; i++){
-                set<int> coveredCases = listIntersection(T);
+                set<int> coveredCases = setsIntersection(T);
                 if(subsetEq(coveredCases, AV[i]->getBlock())){
                     T_G[i].clear();
                 }
@@ -128,35 +128,42 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> AV, set<int> B){
             }
         } // END WHILE (INNER LOOP)
 
+        #if DEBUG == true
+            printSet("T_indices = ", T_indices);
+            printList("T = ", T);
+        #endif
+
         // Remove unnecessary conditions
         if(T.size() > 1){
-            mergeIntervals(T, T_indices);
-            dropConditions(T, T_indices, B);
+            T = mergeIntervals(T, T_indices);
+            T = dropConditions(T, T_indices, B);
         }
 
         #if DEBUG == true
-            printSet("T_indices = ", T_indices);
-            printList("T_G = ", T_G);
+            printSet("(Reduced) T_indices = ", T_indices);
+            printList("T = ", T);
         #endif
 
         // Add to local coverings
-        LC.push_back(T);
-        LC_indices.push_back(T_indices);
+        if(T.size() > 0){
+            LC.push_back(T);
+            LC_indices.push_back(T_indices);
+        }
         
         // Update goal set
         vector<set<int>> tIntersects; 
         for(vector<set<int>> T : LC){
-            tIntersects.push_back(listIntersection(T));
+            tIntersects.push_back(setsIntersection(T));
         }
         #if DEBUG == true
-            printSet("G = B - ", listUnion(tIntersects));
+            printSet("G = B - ", setsUnion(tIntersects));
         #endif
-        G = setDifference(B, listUnion(tIntersects));
+        G = setDifference(B, setsUnion(tIntersects));
     } // END WHILE (OUTER LOOP)
 
     // Remove unnecessary rules
     if(LC.size() > 1){
-        dropRules(LC, LC_indices, B);
+        LC = dropRules(LC, LC_indices, B);
     }
     return LC_indices;
 }
@@ -171,11 +178,11 @@ vector<int> Algorithm::classifyRule(set<int> rule, Concept * concept){
     }
 
     // Intersect all attribute blocks
-    set<int> matchLHS = listIntersection(cases);
+    set<int> matchLHS = setsIntersection(cases);
 
     // Intersect all attribute blocks with concept block
     cases.push_back(concept->getBlock());
-    set<int> matchCase = listIntersection(cases);
+    set<int> matchCase = setsIntersection(cases);
 
     ret.push_back(rule.size());         // push specificity
     ret.push_back(matchCase.size());    // push strength
@@ -267,7 +274,7 @@ int Algorithm::getOptimalCondition(vector<AV *> AV, vector<set<int>> T_G){
     return minCardPos.front();    
 }
 
-void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices){
+vector<set<int>> Algorithm::mergeIntervals(vector<set<int>> T, set<int> & T_indices){
     unsigned i = 0;
     // WHILE: There are at least two elements to compare
     while(i < (T.size() - 1)){
@@ -316,31 +323,34 @@ void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices){
             i++;
         }
     }
+    return T;
 }
 
-void Algorithm::dropConditions(vector<set<int>> & T, set<int> & T_indices, set<int> B){
+vector<set<int>> Algorithm::dropConditions(vector<set<int>> T, set<int> & T_indices, set<int> B){
     for(unsigned i = 0; i < T.size(); i++){
         vector<set<int>> tMinus = removeCondition(T, i);
-        if(subsetEq(listIntersection(tMinus), B)){
+        if(subsetEq(setsIntersection(tMinus), B)){
             T = tMinus;
             T_indices.erase(i);
         }
     }
+    return T;
 }
 
-void Algorithm::dropRules(vector<vector<set<int>>> & LC, vector<set<int>> & LC_indices, set<int> B){
+vector<vector<set<int>>> Algorithm::dropRules(vector<vector<set<int>>> LC, vector<set<int>> & LC_indices, set<int> B){
     for(unsigned i = 0; i < LC.size(); i++){
         vector<vector<set<int>>> lcMinus = removeRule(LC, i);
 
         vector<set<int>> tIntersects; 
         for(vector<set<int>> T : lcMinus){
-            tIntersects.push_back(listIntersection(T));
+            tIntersects.push_back(setsIntersection(T));
         }
-        if(listUnion(tIntersects) == B){
+        if(setsUnion(tIntersects) == B){
             LC = lcMinus;
             LC_indices.erase(LC_indices.begin() + i);
         }
     }
+    return LC;
 }
 
 vector<set<int>> Algorithm::removeCondition(vector<set<int>> & T, int index){

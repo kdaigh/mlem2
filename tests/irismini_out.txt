@@ -1,0 +1,6 @@
+1, 12, 12
+(petal_length, 1.3..2.45) -> (class, Iris-setosa)
+1, 12, 12
+(petal_length, 2..4) -> (class, Iris-versicolor)
+1, 14, 14
+(petal_length, 4.9499998..6) -> (class, Iris-viginica)

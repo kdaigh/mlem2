@@ -36,13 +36,13 @@ public:
     int getOptimalCondition(std::vector<AV *> AV, std::vector<std::set<int>> T_G);
 
     /* Merges intervals for overlapping numeric attribute-value blocks. */
-    void mergeIntervals(std::vector<std::set<int>> & T, std::set<int> & T_indices);
+    std::vector<std::set<int>> mergeIntervals(std::vector<std::set<int>> T, std::set<int> & T_indices);
 
     /* Drops conditions that are unnecessary for the rule. */
-    void dropConditions(std::vector<std::set<int>> & T, std::set<int> & T_indices, std::set<int> B);
+    std::vector<std::set<int>> dropConditions(std::vector<std::set<int>> T, std::set<int> & T_indices, std::set<int> B);
 
     /* Drops rules that are unnecessary for the ruleset. */
-    void dropRules(std::vector<std::vector<std::set<int>>> & LC, std::vector<std::set<int>> & LC_indices, std::set<int> B);
+    std::vector<std::vector<std::set<int>>> dropRules(std::vector<std::vector<std::set<int>>> LC, std::vector<std::set<int>> & LC_indices, std::set<int> B);
 
     /* induceRules HELPER: Remove a single condition from a rule.
        @post T param is not modified. */
