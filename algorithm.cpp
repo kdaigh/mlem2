@@ -142,16 +142,21 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
             dropConditions(T, T_indices, B);
         }
 
-        #if DEBUG == true
-            printSet("REDUCED\nT_indices = ", T_indices);
-            printList("T = ", T);
-        #endif
+        // #if DEBUG == true
+        //     printSet("REDUCED\nT_indices = ", T_indices);
+        //     printList("T = ", T);
+        // #endif
 
         // Add to local coverings
         if(T.size() > 0){
             LC.push_back(T);
             LC_indices.push_back(T_indices);
         }
+
+        #if DEBUG == true
+            printList("LC_indices = ", LC_indices);
+        #endif
+
         
         // Update goal set
         vector<set<int>> tIntersects; 
