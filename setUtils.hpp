@@ -35,8 +35,8 @@ std::set<int> setIntersection(std::set<int> setA, std::set<int> setB){
     return result;
 }
 
-std::set<int> setsIntersection(std::vector<std::set<int>> sets){
-    set<int> result;
+std::set<int> setsIntersection(std::vector<std::set<int> > sets){
+    std::set<int> result;
     if(sets.empty()){
         return result;
     }
@@ -52,7 +52,7 @@ std::set<int> setsIntersection(std::vector<std::set<int>> sets){
         return result;
     }
 
-    set<int> buffer;    
+    std::set<int> buffer;    
     for(unsigned i = 2; i < sets.size(); i++){
         buffer.clear();
 
@@ -77,8 +77,8 @@ std::set<int> setUnion(std::set<int> setA, std::set<int> setB){
     return result;
 }
 
-std::set<int> setsUnion(std::vector<std::set<int>> sets){
-    set<int> result;
+std::set<int> setsUnion(std::vector<std::set<int> > sets){
+    std::set<int> result;
     if(sets.empty()){
         return result;
     }
@@ -94,7 +94,7 @@ std::set<int> setsUnion(std::vector<std::set<int>> sets){
         return result;
     }
 
-    set<int> buffer;    
+    std::set<int> buffer;    
     for(unsigned i = 2; i < sets.size(); i++){
         buffer.clear();
 
@@ -120,7 +120,7 @@ bool commonElements(std::set<int> setA, std::set<int> setB){
 
 void printSet(std::string label, std::set<int> set){
     if(set.empty()){
-        cout << label << "{}\n";
+        std::cout << label << "{}\n";
         return;
     }
     std::cout << label << "{";
@@ -130,13 +130,13 @@ void printSet(std::string label, std::set<int> set){
     std::cout << "}\n";
 }
 
-void printList(std::string label, std::vector<std::set<int>> list){
+void printList(std::string label, std::vector<std::set<int> > list){
     if(list.empty()){
-        cout << label << "{}\n";
+        std::cout << label << "{}\n";
         return;
     }
     std::cout << label << "{\t";
-    for(set<int> set : list){
+    for(std::set<int> set : list){
         std::cout << "{";
         for(int i : set){
             std::cout << i << ", ";
