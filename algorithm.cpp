@@ -150,27 +150,32 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
             #endif
 
             // FOR: Relevant attribute-value blocks
+            int setIndex = 0;
             for(int i : T_G_indices){
                 set<int> intersectSet = setIntersection(av[i]->getBlock(), G);
                 // IF: Pair is not in T
                 if(T_indices.find(i) == T_indices.end()){
-                    T_G[i] = setIntersection(av[i]->getBlock(), G);
+                    T_G[setIndex] = setIntersection(av[i]->getBlock(), G);
                 } 
                 // ELSE: Pair is in T
                 else {
-                    T_G.erase(T_G.begin(), T_G.begin() + i);
+                    T_G.erase(T_G.begin(), T_G.begin() + setIndex);
                 }
-
+                setIndex++;
             }
+
+            #if DEBUG == true
+                printList("T_G = ", T_G);
+            #endif
         } // END WHILE (INNER LOOP)
 
         // Remove unnecessary conditions
         // if(T.size() > 1){
         //     mergeIntervals(T, T_indices);
         // }
-        if(T.size() > 1){
-            dropConditions(T, T_indices, B);
-        }
+        // if(T.size() > 1){
+        //     dropConditions(T, T_indices, B);
+        // }
 
         // Add to local coverings
         if(T.size() > 0){
@@ -197,9 +202,9 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
     } // END WHILE (OUTER LOOP)
 
     // Remove unnecessary rules
-    if(LC.size() > 1){
-        dropRules(LC, LC_indices, B);
-    }
+    // if(LC.size() > 1){
+    //     dropRules(LC, LC_indices, B);
+    // }
     return LC_indices;
 }
 
@@ -269,20 +274,22 @@ int Algorithm::getOptimalCondition(vector<AV *> av, vector<set<int>> T_G, set<in
     std::list<int> maxSizePos, minCardPos;
     size_t maxSize = 0, minCard = INT_MAX;
 
-    // LOOP: For each set intersection
+    int setIndex = 0;
+    // LOOP: For each AV-block index
     for(int i : T_G_indices){
         // IF: Set is non-empty
-        if(!(T_G[i].empty())){
+        if(!(T_G[setIndex].empty())){
             // IF: Current size is larger than maxSize, clear list and add index
-            if(T_G[i].size() > maxSize){
-                maxSize = T_G[i].size();
+            if(T_G[setIndex].size() > maxSize){
+                maxSize = T_G[setIndex].size();
                 maxSizePos.clear();
                 maxSizePos.push_back(i);
             // IF: Current size is equal to maxSize, add index for consideration
-            } else if (T_G[i].size() == maxSize){
+            } else if (T_G[setIndex].size() == maxSize){
                 maxSizePos.push_back(i);
             }
         }
+        setIndex++;
     }
 
     // IF: Unique largest size is found, return position
