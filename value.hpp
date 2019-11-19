@@ -21,15 +21,11 @@ class Value {
 public:
     Value(string strValue) : m_strValue(strValue) {
         stringstream stream (strValue);
-        stream >> m_numValue;
-        if (stream.fail()) {
-            m_type = SYMBOLIC;
+        if(isNumber(strValue)){
+            stream >> m_numValue;
+            m_type = NUMERIC;
         } else {
-            if(isRange(strValue)){
-                m_type = SYMBOLIC;
-            } else {
-                m_type = NUMERIC;
-            }
+            m_type = SYMBOLIC;
         }
     }
     string getStrValue() const{
@@ -44,17 +40,30 @@ public:
         }
         return false;
     }
-    bool isRange(std::string str) const {
+    bool isNumber(std::string str) const {
+        // Check for symbolic ranges (i.e. "40-49")  
         size_t pos = str.find("-");
-        
-        // Dash is found in string
         if(pos != string::npos){
             // Dash is not the first character (it's a symbolic range)
             if(pos != 0){
-                return true;
+                return false;
             }
         }
-        return false;
+
+        // Check for symbolic ranges (i.e. "40..49")       
+        if(str.find("..") != string::npos){
+            return false;
+        }
+
+        // Check for non-numeric characters
+        string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]{};:,/?=~|";
+        for(char c : chars){
+            if(str.find(c) != string::npos){
+                return false;
+            }
+        }
+
+        return true;
     }
 private:
     string m_strValue;
