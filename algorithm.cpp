@@ -28,6 +28,13 @@ void Algorithm::generateAVBlocks(Dataset * data){
         if(data->getValue(1, col)->isNumeric()){
             float min = 0, max = 0;
             list<float> cutpoints = data->discretize(col, min, max);
+            #if DEBUG==true
+                cout << "NUMERIC: Cutpoints for " << attr << ": ";
+                for(float c : cutpoints){
+                    cout << c << ", ";
+                }
+                cout << endl;
+            #endif
 
             // FOR: Each cutpoint, create (empty) attribute-value blocks 
             for (float c : cutpoints){
@@ -38,6 +45,13 @@ void Algorithm::generateAVBlocks(Dataset * data){
         // ELSE: Attribute values are symbolic
         else {
             list<string> values = data->getPossibleValues(col);
+            #if DEBUG==true
+                cout << "SYMBOLIC: Possible values for " << attr << ": ";
+                for(string str : values){
+                    cout << str << ", ";
+                }
+                cout << endl;
+            #endif
 
             // FOR: Each value, create an (empty) attribute-value block
             for (string v : values){
@@ -116,36 +130,32 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
             // Update goal set
             G = setIntersection(av[choicePos]->getBlock(), G);
                 
-            // Update intersections
-            // FOR: Each attribute-value block
+            // Update candidates
+            // FOR: Each original attribute-value block
             for(unsigned i = 0; i < numOrigBlocks; i++){
                 set<int> coveredCases = setsIntersection(T);
-                if(subsetEq(coveredCases, av[i]->getBlock())){
+                if(subsetEq(coveredCases, av[i]->getBlock())){  
                     T_G[i].clear();
                 }
                 else {
                     T_G[i] = setIntersection(av[i]->getBlock(), G);
                 }
             }
+            // for(unsigned i = 0; i < numOrigBlocks; i++){
+            //     T_G[i] = setIntersection(av[i]->getBlock(), G);
+            // }
+            // for(int i : T_indices){
+            //     T_G[i].clear();
+            // }
         } // END WHILE (INNER LOOP)
 
-        #if DEBUG == true
-            printSet("T_indices = ", T_indices);
-            printList("T = ", T);
-        #endif
-
         // Remove unnecessary conditions
-        if(T.size() > 1){
-            mergeIntervals(T, T_indices);
-        }
+        // if(T.size() > 1){
+        //     mergeIntervals(T, T_indices);
+        // }
         if(T.size() > 1){
             dropConditions(T, T_indices, B);
         }
-
-        // #if DEBUG == true
-        //     printSet("REDUCED\nT_indices = ", T_indices);
-        //     printList("T = ", T);
-        // #endif
 
         // Add to local coverings
         if(T.size() > 0){
@@ -159,14 +169,16 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
 
         
         // Update goal set
-        vector<set<int>> tIntersects; 
+        vector<set<int>> covered; 
         for(vector<set<int>> T : LC){
-            tIntersects.push_back(setsIntersection(T));
+            covered.push_back(setsIntersection(T));
         }
+        G = setDifference(B, setsUnion(covered));
+
+
         #if DEBUG == true
-            printSet("G = B - ", setsUnion(tIntersects));
+            printSet("G = ", G);
         #endif
-        G = setDifference(B, setsUnion(tIntersects));
     } // END WHILE (OUTER LOOP)
 
     // Remove unnecessary rules
