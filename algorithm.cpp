@@ -109,6 +109,7 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
         vector<set<int>> T;
         set<int> T_indices;
         vector<set<int>> T_G;
+        set<int> T_G_indices;
 
         #if DEBUG == true
             printSet("G = ", G);
@@ -116,37 +117,37 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
         
         // FOR: All attribute-value blocks
         for(unsigned i = 0; i < numOrigBlocks; i++){
-            T_G.push_back(setIntersection(av[i]->getBlock(), G));
+            set<int> intersectSet = setIntersection(av[i]->getBlock(), G);
+            // IF: Intersection is non-empty
+            if(!(intersectSet.empty())){
+                T_G_indices.insert(i);
+                T_G.push_back(setIntersection(av[i]->getBlock(), G));
+            }        
         }
         
         // Select conditions for rule
         // WHILE: T is non-empty or T is not subsetEq to B
         while( (T.empty()) || !(subsetEq(setsIntersection(T), B)) ){
             // Find optimal choice; Add it to T
-            int choicePos = getOptimalCondition(av, T_G);
+            int choicePos = getOptimalCondition(av, T_G, T_G_indices);
             T.push_back(av[choicePos]->getBlock());
             T_indices.insert(choicePos);
                 
             // Update goal set
             G = setIntersection(av[choicePos]->getBlock(), G);
-                
+        
             // Update candidates
-            // FOR: Each original attribute-value block
-            for(unsigned i = 0; i < numOrigBlocks; i++){
-                set<int> coveredCases = setsIntersection(T);
-                if(subsetEq(coveredCases, av[i]->getBlock())){  
-                    T_G[i].clear();
-                }
-                else {
-                    T_G[i] = setIntersection(av[i]->getBlock(), G);
-                }
+            T_G_indices = setDifference(T_G_indices, T_indices);
+
+            // FOR: Relevant attribute-value blocks
+            for(int i : T_G_indices){
+                set<int> intersectSet = setIntersection(av[i]->getBlock(), G);
+                if(!(intersectSet.empty())){
+                    T_G_indices.insert(i);
+                    T_G.push_back(setIntersection(av[i]->getBlock(), G));
+                }     
+
             }
-            // for(unsigned i = 0; i < numOrigBlocks; i++){
-            //     T_G[i] = setIntersection(av[i]->getBlock(), G);
-            // }
-            // for(int i : T_indices){
-            //     T_G[i].clear();
-            // }
         } // END WHILE (INNER LOOP)
 
         // Remove unnecessary conditions
@@ -250,12 +251,12 @@ std::string Algorithm::generateRuleset(Dataset * data){
     return stream.str();
 }
 
-int Algorithm::getOptimalCondition(vector<AV *> av, vector<set<int>> T_G){
+int Algorithm::getOptimalCondition(vector<AV *> av, vector<set<int>> T_G, set<int> T_G_indices){
     std::list<int> maxSizePos, minCardPos;
     size_t maxSize = 0, minCard = INT_MAX;
 
     // LOOP: For each set intersection
-    for(unsigned i = 0; i < T_G.size(); i++){
+    for(int i : T_G_indices){
         // IF: Set is non-empty
         if(!(T_G[i].empty())){
             // IF: Current size is larger than maxSize, clear list and add index

@@ -33,7 +33,7 @@ public:
     std::vector<std::set<int>> induceRules(std::vector<AV *> AV, std::set<int> B);
 
     /* Finds the position of the best attribute-value pair. */
-    int getOptimalCondition(std::vector<AV *> AV, std::vector<std::set<int>> T_G);
+    int getOptimalCondition(std::vector<AV *> AV, std::vector<std::set<int>> T_G, std::set<int> T_G_indices);
 
     /* Merges intervals for overlapping numeric attribute-value blocks. */
     void mergeIntervals(std::vector<std::set<int>> & T, std::set<int> & T_indices);
