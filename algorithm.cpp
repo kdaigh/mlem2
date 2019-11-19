@@ -137,17 +137,17 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
             int choicePos = getOptimalCondition(av, T_G, T_G_indices);
             T.push_back(av[choicePos]->getBlock());
             T_indices.insert(choicePos);
+
+            #if DEBUG==true
+                printSet("T_indices = ", T_indices);
+                printSet("T_G_indices = ", T_G_indices);
+            #endif
                 
             // Update goal set
             G = setIntersection(av[choicePos]->getBlock(), G);
         
             // Update candidates
             T_G_indices = setDifference(T_G_indices, T_indices);
-
-            #if DEBUG==true
-                printSet("T_indices = ", T_indices);
-                printSet("T_G_indices = ", T_G_indices);
-            #endif
 
             // FOR: Relevant attribute-value blocks
             int setIndex = 0;
@@ -163,16 +163,12 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
                 }
                 setIndex++;
             }
-
-            #if DEBUG == true
-                printList("T_G = ", T_G);
-            #endif
         } // END WHILE (INNER LOOP)
 
         // Remove unnecessary conditions
-        // if(T.size() > 1){
-        //     mergeIntervals(T, T_indices);
-        // }
+        if(T.size() > 1){
+            mergeIntervals(T, T_indices);
+        }
         // if(T.size() > 1){
         //     dropConditions(T, T_indices, B);
         // }
