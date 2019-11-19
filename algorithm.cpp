@@ -124,6 +124,11 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
                 T_G.push_back(setIntersection(av[i]->getBlock(), G));
             }        
         }
+
+        #if DEBUG==true
+            printSet("T_indices = ", T_indices);
+            printSet("T_G_indices = ", T_G_indices);
+        #endif
         
         // Select conditions for rule
         // WHILE: T is non-empty or T is not subsetEq to B
@@ -139,13 +144,22 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
             // Update candidates
             T_G_indices = setDifference(T_G_indices, T_indices);
 
+            #if DEBUG==true
+                printSet("T_indices = ", T_indices);
+                printSet("T_G_indices = ", T_G_indices);
+            #endif
+
             // FOR: Relevant attribute-value blocks
             for(int i : T_G_indices){
                 set<int> intersectSet = setIntersection(av[i]->getBlock(), G);
-                if(!(intersectSet.empty())){
-                    T_G_indices.insert(i);
-                    T_G.push_back(setIntersection(av[i]->getBlock(), G));
-                }     
+                // IF: Pair is not in T
+                if(T_indices.find(i) == T_indices.end()){
+                    T_G[i] = setIntersection(av[i]->getBlock(), G);
+                } 
+                // ELSE: Pair is in T
+                else {
+                    T_G.erase(T_G.begin(), T_G.begin() + i);
+                }
 
             }
         } // END WHILE (INNER LOOP)
