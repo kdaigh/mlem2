@@ -156,7 +156,7 @@ LocalCover Algorithm::induceRules(Concept * concept){
         } // END WHILE (INNER LOOP)
 
         // Remove unnecessary conditions
-        rule.mergeIntervals(m_avBlocks);
+        // rule.mergeIntervals(m_avBlocks);
         rule.dropConditions(m_avBlocks, B);
 
         // Add to local covering

@@ -8,8 +8,6 @@
 #include "avNumeric.hpp"
 #include "rule.hpp"
 #include "utils.hpp"
-#include <vector>
-#define DEBUG true
 
 using namespace std;
 
@@ -42,6 +40,9 @@ set<int> Rule::getConditions() const {
 }
 
 set<int> Rule::getBlock(vector<AV *> avBlocks) const {
+    if(m_conditions.empty()){
+        return m_conditions;
+    }
     vector<set<int>> blocks;
     for(int i : m_conditions){
         blocks.push_back(avBlocks[i]->getBlock());
@@ -58,60 +59,6 @@ set<int> Rule::getAttributeGroup(vector<AV *> avBlocks, int index) const {
     }
     return result;
 }
-
-// void Rule::mergeIntervals(vector<AV *> avBlocks) {
-//     set<int> mergedConditions;
-//     mergedConditions.insert(m_conditions.begin(), m_conditions.end());
-//     for(auto iter = m_conditions.begin(); iter != m_conditions.end();){
-//         bool increment = true;
-//         int mergedMin = avBlocks[(*iter)]->getMinValue();
-//         int mergedMax = avBlocks[(*iter)]->getMaxValue();
-//         set<int> attrGroup;
-//         set<int> mergedBlock;
-//         if(avBlocks[(*iter)]->isNumeric()){
-//             attrGroup = getAttributeGroup(avBlocks, (*iter));
-//             mergedBlock = avBlocks[(*iter)]->getBlock();
-//             for( int i : attrGroup ){
-//                 mergedMin = max(mergedMin, avBlocks[i]->getMinValue());
-//                 mergedMax = min(mergedMax, avBlocks[i]->getMaxValue());
-//                 mergedBlock = setIntersection(mergedBlock, avBlocks[i]->getBlock());
-//             }
-//             attrGroup.insert((*iter));
-
-//             // If: Intervals overlap, merge intervals
-//             if(mergedMax > mergedMin){
-//                 #if DEBUG==true
-//                     cout << "Merging " << mergedMin << ".." << mergedMax << endl;
-//                 #endif
-//                 int pos = -1;
-//                 for( int j : attrGroup){
-//                     if(avBlocks[j]->getMinValue() == mergedMin && avBlocks[j]->getMaxValue() == mergedMax){
-//                         pos = j;
-//                         break;
-//                     }
-//                 }
-                
-//                 if(pos == -1){
-//                     pos = avBlocks.size();
-//                     avBlocks.push_back(new AVNumeric(avBlocks[(*iter)]->getAttr(), -1, mergedMin, mergedMax));
-//                     avBlocks[pos]->setBlock(mergedBlock);            
-//                 }
-
-//                 for( int j : attrGroup ){
-//                     mergedConditions.erase(j);
-//                     iter++;
-//                 }
-//                 mergedConditions.insert(pos);
-//                 increment = false;
-//             }
-//         }
-//         if(increment){
-//             iter++;
-//         }
-//     }
-//     printSet("mergedConditions = ", mergedConditions);
-//     this->setConditions(mergedConditions);
-// }
 
 void Rule::mergeIntervals(vector<AV *> avBlocks){
     if(m_conditions.size() <= 1){

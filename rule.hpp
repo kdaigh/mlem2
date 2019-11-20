@@ -11,6 +11,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#define DEBUG false
 
 class Rule {
     /* Global to track current ID. */

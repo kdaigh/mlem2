@@ -16,20 +16,8 @@ Please provide different input and output file names.
 
 ## Timing
 
-For small data sets, results can be expected in less than a few minutes. For larger
-data sets, allow at least ten minutes for results. The timing of the program's execution,
-from start to finish, for the given test files have been provided below for reference:
-
-    File            Cases       Attributes      Time
-    austr.txt       690         14              10m 53s
-    bowl.txt        720         4               -
-    breast.txt      277         9               -
-    iris.txt        150         4               0m 21s 
-    wine.txt        178         13              0m 9s 
-
-Based on trial runs, the time of execution scales with the size of goal sets.
-
-This data was collected on the cycle servers, using the Linux time command.
+For consistent data sets sized similarly to the example datasets provided, results can be 
+expected in less than a few minutes.
 
 ## Ordering
 
@@ -39,3 +27,8 @@ for the first attribute (column) are listed, then all of the attribute-value blo
 for the second attribute, and so on. Within each attribute, symbolic data is ordered
 alphabetically and numeric data is ordered by ascending cutpoints to maintain 
 consistency.
+
+## Constraints
+
+This program does not perform interval reduction. It does, however, drop conditions
+and rules as part of the LEM2 algorithm.
