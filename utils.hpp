@@ -2,8 +2,8 @@
 // Project: MLEM2 Rule Induction
 // Date: 11/20/2019
 
-/** Header file for setUtils.
-    @file setUtils.hpp 
+/** Header file for utils.
+    @file utils.hpp 
     This class provides project-wide
     utility functions for sets, etc. */
 

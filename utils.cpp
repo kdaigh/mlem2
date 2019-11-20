@@ -2,12 +2,12 @@
 // Project: MLEM2 Rule Induction
 // Date: 11/20/2019
 
-/** Source file for setUtils.
-    @file setUtils.cpp 
+/** Source file for utils.
+    @file utils.cpp 
     This class provides project-wide
     utility functions for sets, etc. */
 
-#include "setUtils.hpp"
+#include "utils.hpp"
 #include <iostream>
 
 using namespace std;
