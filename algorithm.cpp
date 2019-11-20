@@ -196,21 +196,21 @@ LocalCover Algorithm::induceRules(Concept * concept){
             for(auto const & [i, intersect] : T_G){
                 T_G[i] = setIntersection(m_avBlocks[i]->getBlock(), G);
             }
-        }
+        } // END WHILE (INNER LOOP)
 
         // Remove unnecessary conditions
         //rule.mergeIntervals(m_avBlocks);
-        //rule.dropConditions(m_avBlocks, B);
+        rule.dropConditions(m_avBlocks, B);
 
         // Add to local covering
         lc.addRule(new Rule(rule));
         
         // Update goal set
         G = setDifference(B, lc.getCoveredConditions(m_avBlocks));
-    }
+    } // END WHILE (OUTER LOOP)
 
     // Remove unnecessary rules
-    //lc.dropRules(m_avBlocks, B);
+    lc.dropRules(m_avBlocks, B);
 
     return lc;
 }

@@ -34,6 +34,9 @@ public:
        @param avBlocks, array of attribute-value blocks. */
     std::set<int> getBlock(std::vector<AV *> avBlocks) const;
 
+    /* Retrieves the intersections of all conditions with the same attribute as given condition. */
+    std::set<int> getAttributeGroup(std::vector<AV *> avBlocks, int index) const;
+
     /* Optimize rule by merging intervals. 
        @param avBlocks, array of attribute-value blocks.*/
     void mergeIntervals(std::vector<AV *> avBlocks);
