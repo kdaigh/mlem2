@@ -7,4 +7,4 @@
 4, 2, 2
 (Wind, 4..6) & (Wind, 4..10) & (Wind, 4..14) & (Wind, 4..23) -> (Trip, yes)
 2, 1, 1
-(Wind, 4..10) & (Temperature, low) -> (Trip, yes)
+(Humidity, low) & (Temperature, low) -> (Trip, yes)

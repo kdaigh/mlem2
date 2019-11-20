@@ -7,8 +7,9 @@
     This class provides project-wide
     utility functions for sets, etc. */
 
-#include <set>
 #include <algorithm>
+#include <map>
+#include <set>
 #include <vector>
 
 std::set<int> setDifference(std::set<int> setA, std::set<int> setB);
@@ -28,3 +29,5 @@ bool commonElements(std::set<int> setA, std::set<int> setB);
 void printSet(std::string label, std::set<int> set);
 
 void printList(std::string label, std::vector<std::set<int> > list);
+
+void printMap(std::map<int, std::set<int>> map);

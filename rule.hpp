@@ -10,6 +10,7 @@
 #include "av.hpp"
 #include <set>
 #include <string>
+#include <vector>
 
 class Rule {
     /* Global to track current ID. */

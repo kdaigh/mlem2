@@ -146,3 +146,11 @@ void printList(string label, vector<set<int> > list){
     }
     cout << "}\n";
 }
+
+void printMap( map<int, set<int>> map ) {
+    // FOR: Each rule, print to file
+    for( auto const & [x, y] : map ){
+        cout << "T[" << x << "] = ";
+        printSet("", y);
+    }
+}
