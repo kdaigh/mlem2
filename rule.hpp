@@ -30,6 +30,9 @@ public:
        @returns True if the condition is found; False, otherwise. */
     bool containsCondition(int index) const;
 
+    /* Returns set of (indices of) selected conditions. */
+    std::set<int> getConditions() const;
+
     /* Retrieves the intersection of all attribute-value pairs in the rule.
        @param avBlocks, array of attribute-value blocks. */
     std::set<int> getBlock(std::vector<AV *> avBlocks) const;

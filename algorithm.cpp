@@ -210,7 +210,7 @@ LocalCover Algorithm::induceRules(Concept * concept){
     } // END WHILE (OUTER LOOP)
 
     // Remove unnecessary rules
-    lc.dropRules(m_avBlocks, B);
+    //lc.dropRules(m_avBlocks, B);
 
     return lc;
 }

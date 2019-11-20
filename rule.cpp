@@ -33,6 +33,10 @@ bool Rule::containsCondition(int index) const {
     return true;
 }
 
+set<int> Rule::getConditions() const {
+    return m_conditions;
+}
+
 set<int> Rule::getBlock(vector<AV *> avBlocks) const {
     vector<set<int>> blocks;
     for(int i : m_conditions){
@@ -159,11 +163,21 @@ void Rule::dropConditions(vector<AV *> avBlocks, set<int> B){
         return;
     }
     // Else: Rule has at least two conditions
-    for(int c : m_conditions){
+    set<int>::iterator iter;
+    for(iter = m_conditions.begin(); iter != m_conditions.end();){
         Rule r = *this;
-        r.removeCondition(c);
+        r.removeCondition(*iter);
+        #if DEBUG==true
+            printSet("Original rule: ", m_conditions);
+            printSet("Modified rule: ", r.getConditions());
+        #endif
         if(subsetEq(r.getBlock(avBlocks), B)){
-            this->removeCondition(c);
+            iter = m_conditions.erase(iter);
+            #if DEBUG==true
+                printSet("Modified original rule: ", m_conditions);
+            #endif
+        } else {
+            iter++;
         }
     }
 }
