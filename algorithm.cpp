@@ -199,7 +199,8 @@ LocalCover Algorithm::induceRules(Concept * concept){
         } // END WHILE (INNER LOOP)
 
         // Remove unnecessary conditions
-        //rule.mergeIntervals(m_avBlocks);
+        rule.mergeIntervals(m_avBlocks);
+        cout << "!";
         rule.dropConditions(m_avBlocks, B);
 
         // Add to local covering
@@ -210,7 +211,7 @@ LocalCover Algorithm::induceRules(Concept * concept){
     } // END WHILE (OUTER LOOP)
 
     // Remove unnecessary rules
-    //lc.dropRules(m_avBlocks, B);
+    lc.dropRules(m_avBlocks, B);
 
     return lc;
 }
