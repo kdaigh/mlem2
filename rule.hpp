@@ -30,6 +30,9 @@ public:
        @returns True if the condition is found; False, otherwise. */
     bool containsCondition(int index) const;
 
+    /* Updates (or sets) conditions. */
+    void setConditions(std::set<int> conditions);
+
     /* Returns set of (indices of) selected conditions. */
     std::set<int> getConditions() const;
 

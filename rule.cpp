@@ -33,6 +33,10 @@ bool Rule::containsCondition(int index) const {
     return true;
 }
 
+void Rule::setConditions(set<int> conditions){
+    m_conditions = conditions;
+}
+
 set<int> Rule::getConditions() const {
     return m_conditions;
 }
@@ -106,8 +110,7 @@ void Rule::mergeIntervals(vector<AV *> avBlocks) {
         }
     }
     printSet("mergedConditions = ", mergedConditions);
-    m_conditions.clear();
-    m_conditions.insert(mergedConditions.begin(), mergedConditions.end());
+    this->setConditions(mergedConditions);
 }
 
 // void Rule::mergeIntervals(vector<AV *> avBlocks) {
