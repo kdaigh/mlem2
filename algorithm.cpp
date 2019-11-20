@@ -10,7 +10,6 @@
 
 
 #include "algorithm.hpp"
-#include "setUtils.hpp"
 #include <algorithm>
 #include <limits.h>
 
@@ -98,16 +97,15 @@ vector<Concept *> Algorithm::generateConcepts(Dataset * data){
     return concepts;
 }
 
-vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
+LocalCover Algorithm::induceRules(Concept * concept){
+    set<int> B = concept->getBlock();
     set<int> G = B;
-    vector<vector<set<int>>> LC;
-    vector<set<int>> LC_indices;
-    size_t numOrigBlocks = av.size();
+    LocalCover lc(concept);
+    size_t numOrigBlocks = m_avBlocks.size();
 
     // WHILE: G is non-empty
     while(!G.empty()){
-        vector<set<int>> T;
-        set<int> T_indices;
+        Rule rule;
         vector<set<int>> T_G;
         set<int> T_G_indices;
 
@@ -117,45 +115,34 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
         
         // FOR: All attribute-value blocks
         for(unsigned i = 0; i < numOrigBlocks; i++){
-            set<int> intersectSet = setIntersection(av[i]->getBlock(), G);
+            set<int> intersectSet = setIntersection(m_avBlocks[i]->getBlock(), G);
             // IF: Intersection is non-empty
             if(!(intersectSet.empty())){
                 T_G_indices.insert(i);
-                T_G.push_back(setIntersection(av[i]->getBlock(), G));
+                T_G.push_back(setIntersection(m_avBlocks[i]->getBlock(), G));
             }        
         }
-
-        #if DEBUG==true
-            printSet("T_indices = ", T_indices);
-            printSet("T_G_indices = ", T_G_indices);
-        #endif
         
         // Select conditions for rule
         // WHILE: T is non-empty or T is not subsetEq to B
-        while( (T.empty()) || !(subsetEq(setsIntersection(T), B)) ){
+        while( (rule.empty()) || !(subsetEq(rule.getBlock(m_avBlocks), B)) ){
             // Find optimal choice; Add it to T
-            int choicePos = getOptimalCondition(av, T_G, T_G_indices);
-            T.push_back(av[choicePos]->getBlock());
-            T_indices.insert(choicePos);
-
-            #if DEBUG==true
-                printSet("T_indices = ", T_indices);
-                printSet("T_G_indices = ", T_G_indices);
-            #endif
+            int choicePos = getOptimalCondition(m_avBlocks, T_G, T_G_indices);
+            rule.addCondition(choicePos);
                 
             // Update goal set
-            G = setIntersection(av[choicePos]->getBlock(), G);
+            G = setIntersection(m_avBlocks[choicePos]->getBlock(), G);
         
             // Update candidates
-            T_G_indices = setDifference(T_G_indices, T_indices);
+            T_G_indices = setDifference(T_G_indices, rule.m_conditions);
 
             // FOR: Relevant attribute-value blocks
             int setIndex = 0;
             for(int i : T_G_indices){
-                set<int> intersectSet = setIntersection(av[i]->getBlock(), G);
+                set<int> intersectSet = setIntersection(m_avBlocks[i]->getBlock(), G);
                 // IF: Pair is not in T
-                if(T_indices.find(i) == T_indices.end()){
-                    T_G[setIndex] = setIntersection(av[i]->getBlock(), G);
+                if(rule.containsCondition(i)){
+                    T_G[setIndex] = setIntersection(m_avBlocks[i]->getBlock(), G);
                 } 
                 // ELSE: Pair is in T
                 else {
@@ -166,70 +153,40 @@ vector<set<int>> Algorithm::induceRules(vector<AV *> av, set<int> B){
         } // END WHILE (INNER LOOP)
 
         // Remove unnecessary conditions
-        if(T.size() > 1){
-            mergeIntervals(T, T_indices);
-        }
-        // if(T.size() > 1){
-        //     dropConditions(T, T_indices, B);
-        // }
+        rule.mergeIntervals(m_avBlocks);
+        rule.dropConditions(m_avBlocks, B);
 
-        // Add to local coverings
-        if(T.size() > 0){
-            LC.push_back(T);
-            LC_indices.push_back(T_indices);
-        }
-
-        #if DEBUG == true
-            printList("LC_indices = ", LC_indices);
-        #endif
-
+        // Add to local covering
+        lc.addRule(new Rule(rule));
         
         // Update goal set
-        vector<set<int>> covered; 
-        for(vector<set<int>> T : LC){
-            covered.push_back(setsIntersection(T));
-        }
-        G = setDifference(B, setsUnion(covered));
-
-
-        #if DEBUG == true
-            printSet("G = ", G);
-        #endif
+        G = setDifference(B, lc.getCoveredConditions(m_avBlocks));
     } // END WHILE (OUTER LOOP)
 
     // Remove unnecessary rules
-    // if(LC.size() > 1){
-    //     dropRules(LC, LC_indices, B);
-    // }
-    return LC_indices;
+    lc.dropRules(m_avBlocks, B);
+
+    return lc;
 }
 
-vector<int> Algorithm::classifyRule(set<int> rule, Concept * concept){
-    vector<int> ret;
-    vector<set<int>> cases;
+// vector<int> Algorithm::classifyRule(Rule * rule, Concept * concept){
+//     vector<int> ret;
+//     vector<set<int>> cases;
     
-    // FOR: Each attribute in the rule, add the block
-    for(int attribute : rule){
-        cases.push_back(m_avBlocks[attribute]->getBlock());
-    }
+//     // Intersect all attribute blocks
+//     set<int> matchLHS = rule->getBlock(m_avBlocks);
 
-    // Intersect all attribute blocks
-    set<int> matchLHS = setsIntersection(cases);
+//     // Intersect all attribute blocks with concept block
+//     set<int> matchCase = setIntersection(rule->getBlock(m_avBlocks), concept->getBlock());
 
-    // Intersect all attribute blocks with concept block
-    cases.push_back(concept->getBlock());
-    set<int> matchCase = setsIntersection(cases);
+//     ret.push_back(rule->size());         // push specificity
+//     ret.push_back(matchCase.size());    // push strength
+//     ret.push_back(matchLHS.size());     // push size
 
-    ret.push_back(rule.size());         // push specificity
-    ret.push_back(matchCase.size());    // push strength
-    ret.push_back(matchLHS.size());     // push size
+//     return ret;
+// }
 
-    return ret;
-}
-
-std::string Algorithm::generateRuleset(Dataset * data){
-    stringstream stream;
-
+void Algorithm::generateRuleset(ostream & file, Dataset * data){
     // Generate program components
     generateAVBlocks(data);
     vector <Concept *> concepts = generateConcepts(data);
@@ -240,30 +197,11 @@ std::string Algorithm::generateRuleset(Dataset * data){
             cout << concept->toString() << endl;
         #endif
         
-        vector<set<int>> rules = induceRules(m_avBlocks, concept->getBlock());
+        LocalCover rules = induceRules(concept);
+        file << rules.toString(m_avBlocks);
 
-        // FOR: Each rule, print to file
-        for(set<int> rule : rules){
-            vector<int> classification = classifyRule(rule, concept);
-            // Print classification to string
-            stream << classification.at(0) << ", " << classification.at(1) << ", " << classification.at(2) << endl;
-
-            // Print conditions to string
-            unsigned index = 0;
-            for(int condition : rule){
-                stream << m_avBlocks[condition]->labelString();
-                if(index + 1 != rule.size()){
-                    stream << " & ";
-                }
-                index++;
-            }
-
-            // Print decision to string
-            stream << " -> (" << concept->getDecision() << ", " << concept->getValue() << ")" << endl;
-        }
         delete concept;
     }
-    return stream.str();
 }
 
 int Algorithm::getOptimalCondition(vector<AV *> av, vector<set<int>> T_G, set<int> T_G_indices){
@@ -312,90 +250,105 @@ int Algorithm::getOptimalCondition(vector<AV *> av, vector<set<int>> T_G, set<in
     return minCardPos.front();    
 }
 
-void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices){
-    unsigned i = 0;
-    // WHILE: There are at least two elements to compare
-    while(i < (T.size() - 1)){
-        bool increment = true;
-        set<int>::iterator curIter = next(T_indices.begin(), i);
-        set<int>::iterator nextIter = next(curIter);     
-        AV * curBlock = m_avBlocks[(*curIter)];
-        AV * nextBlock = m_avBlocks[(*nextIter)];
-        // IF: Current and next attribute-value blocks are numeric
-        if(curBlock->isNumeric() && nextBlock->isNumeric()){
-            // IF: Current and next blocks have same attribute
-            if(curBlock->getAttr() == nextBlock->getAttr()){
-                int mergedMin = max(curBlock->getMinValue(), nextBlock->getMinValue());
-                int mergedMax = min(curBlock->getMaxValue(), nextBlock->getMaxValue());
-                // If: Intervals overlap, merge intervals
-                if(mergedMax > mergedMin){
-                    #if DEBUG == true
-                        cout << "Merging intervals to " << mergedMin << ".." << mergedMax << endl;
-                    #endif
+// void Algorithm::mergeIntervals(vector<set<int>> & T, set<int> & T_indices){
+//     unsigned i = 0;
+//     // WHILE: There are at least two elements to compare
+//     while(i < (T.size() - 1)){
+//         cout << "index: " << i << endl;
+//         cout << "T = {";
+//         for(int k : T_indices){
+//             cout << m_avBlocks[k]->labelString() << ", ";
+//         }
+//         cout << "}\n";
+//         bool increment = true;
+//         set<int>::iterator curIter = next(T_indices.begin(), i);
+//         set<int>::iterator nextIter = next(curIter);     
+//         AV * curBlock = m_avBlocks[(*curIter)];
+//         AV * nextBlock = m_avBlocks[(*nextIter)];
+//         // IF: Current and next attribute-value blocks are numeric
+//         if(curBlock->isNumeric() && nextBlock->isNumeric()){
+//             // IF: Current and next blocks have same attribute
+//             cout << curBlock->getAttr() << " == " << nextBlock->getAttr() << "?\n";
+//             if(curBlock->getAttr() == nextBlock->getAttr()){
+//                 int mergedMin = max(curBlock->getMinValue(), nextBlock->getMinValue());
+//                 int mergedMax = min(curBlock->getMaxValue(), nextBlock->getMaxValue());
+//                 // If: Intervals overlap, merge intervals
+//                 if(mergedMax > mergedMin){
+//                     #if DEBUG == true
+//                         cout << "Merging blocks " << curBlock->labelString() << " & " << nextBlock->labelString() << endl;
+//                     #endif
 
-                    int pos = -1;
-                    for(unsigned j = 0; j < m_avBlocks.size(); j++){
-                        if(m_avBlocks[j]->getMinValue() == mergedMin && m_avBlocks[j]->getMaxValue() == mergedMax){
-                            pos = j;
-                            break;
-                        }
-                    }
+//                     int pos = -1;
+//                     for(unsigned j = 0; j < m_avBlocks.size(); j++){
+//                         if(m_avBlocks[j]->getMinValue() == mergedMin && m_avBlocks[j]->getMaxValue() == mergedMax){
+//                             pos = j;
 
-                    // IF: Block does not already exist, create one
-                    if(pos == -1){
-                        pos = m_avBlocks.size();
-                        m_avBlocks.push_back(new AVNumeric(curBlock->getAttr(), -1, mergedMin, mergedMax));
-                        m_avBlocks[pos]->setBlock(setIntersection(curBlock->getBlock(), nextBlock->getBlock()));
-                    }
-                    T[i] = m_avBlocks[pos]->getBlock();
-                    T = removeCondition(T, i + 1);
-                    T_indices.erase((*curIter));
-                    T_indices.erase((*nextIter));
-                    T_indices.insert(pos);
-                    increment = false;
-                }
-            }
-        }
-        // IF: Current block is unchanged, consider next
-        if(increment){
-            i++;
-        }
-    }
-}
+//                             #if DEBUG==true
+//                                 cout << "Found merged block @ " << j << endl;
+//                             #endif
 
-void Algorithm::dropConditions(vector<set<int>> & T, set<int> & T_indices, set<int> B){
-    for(unsigned i = 0; i < T.size(); i++){
-        vector<set<int>> tMinus = removeCondition(T, i);
-        if(subsetEq(setsIntersection(tMinus), B)){
-            T = tMinus;
-            T_indices.erase(i);
-        }
-    }
-}
+//                             break;
+//                         }
+//                     }
 
-void Algorithm::dropRules(vector<vector<set<int>>> & LC, vector<set<int>> & LC_indices, set<int> B){
-    for(unsigned i = 0; i < LC.size(); i++){
-        vector<vector<set<int>>> lcMinus = removeRule(LC, i);
+//                     // IF: Block does not already exist, create one
+//                     if(pos == -1){
+//                         pos = m_avBlocks.size();
+//                         m_avBlocks.push_back(new AVNumeric(curBlock->getAttr(), -1, mergedMin, mergedMax));
+//                         m_avBlocks[pos]->setBlock(setIntersection(curBlock->getBlock(), nextBlock->getBlock()));
+//                         #if DEBUG==true
+//                             cout << "Created new block for " << m_avBlocks[pos]->labelString() << " @ " << pos << endl;
+//                         #endif
+//                     }
+//                     T = removeCondition(T, i + 1);
+//                     T[i] = m_avBlocks[pos]->getBlock();    
+//                     T_indices.erase((*curIter));
+//                     T_indices.erase((*nextIter));
+//                     T_indices.insert(pos);
+//                     increment = false;
+//                 }
+//             }
+//         }
+//         // IF: Current block is unchanged, consider next
+//         if(increment){
+//             i++;
+//         }
+//     }
+// }
 
-        vector<set<int>> tIntersects; 
-        for(vector<set<int>> T : lcMinus){
-            tIntersects.push_back(setsIntersection(T));
-        }
-        if(setsUnion(tIntersects) == B){
-            LC = lcMinus;
-            LC_indices.erase(LC_indices.begin() + i);
-        }
-    }
-}
+// void Algorithm::dropConditions(vector<set<int>> & T, set<int> & T_indices, set<int> B){
+//     for(unsigned i = 0; i < T.size(); i++){
+//         vector<set<int>> tMinus = removeCondition(T, i);
+//         if(subsetEq(setsIntersection(tMinus), B)){
+//             T = tMinus;
+//             T_indices.erase(i);
+//         }
+//     }
+// }
 
-vector<set<int>> Algorithm::removeCondition(const vector<set<int>> & T, int index){
-    vector<set<int>> temp = T;
-    temp.erase(temp.begin() + index);
-    return temp;
-}
+// void Algorithm::dropRules(vector<vector<set<int>>> & LC, vector<set<int>> & LC_indices, set<int> B){
+//     for(unsigned i = 0; i < LC.size(); i++){
+//         vector<vector<set<int>>> lcMinus = removeRule(LC, i);
 
-vector<vector<set<int>>> Algorithm::removeRule(const vector<vector<set<int>>> & T, int index){
-    vector<vector<set<int>>> temp = T;
-    temp.erase(temp.begin() + index);
-    return temp;
-}
+//         vector<set<int>> tIntersects; 
+//         for(vector<set<int>> T : lcMinus){
+//             tIntersects.push_back(setsIntersection(T));
+//         }
+//         if(setsUnion(tIntersects) == B){
+//             LC = lcMinus;
+//             LC_indices.erase(LC_indices.begin() + i);
+//         }
+//     }
+// }
+
+// vector<set<int>> Algorithm::removeCondition(const vector<set<int>> & T, int index){
+//     vector<set<int>> temp = T;
+//     temp.erase(temp.begin() + index);
+//     return temp;
+// }
+
+// vector<vector<set<int>>> Algorithm::removeRule(const vector<vector<set<int>>> & T, int index){
+//     vector<vector<set<int>>> temp = T;
+//     temp.erase(temp.begin() + index);
+//     return temp;
+// }

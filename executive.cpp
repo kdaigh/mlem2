@@ -74,7 +74,7 @@ bool Executive::generateOutFile(string filename){
     }
 
     Algorithm mlem2(m_numAttributes);
-    file << mlem2.generateRuleset(m_data);
+    mlem2.generateRuleset(file, m_data);
 
     file.close();
     return true;

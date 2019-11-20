@@ -11,43 +11,19 @@
 #include <sstream>
 #include <set>
 
-using namespace std;
-
 class Concept {
 public:
-    Concept(string d, string v) 
-        : m_decision(d), m_value(v) {}
-    string getDecision() const {
-        return m_decision;
-    }
-    string getValue() const {
-        return m_value;
-    }
-    set<int> getBlock() const {
-        return m_block;
-    }
-    size_t getBlockSize() const {
-        return m_block.size();
-    }
-    void addCase(int c){ 
-        m_block.insert(c); 
-    }
-    string toString(){
-        stringstream stream;
-        stream << "[(" << m_decision << ", " << m_value << ")] = {";
-        unsigned index = 0;
-        for(int x : m_block){
-            stream << x;
-            if(index + 1 != m_block.size()){
-                stream << ", ";
-            }
-        }
-        stream << "}";
-        return stream.str();
-    }
+    Concept(std::string d, std::string v);
+    std::string getDecision() const;
+    std::string getValue() const;
+    std::set<int> getBlock() const;
+    std::size_t getBlockSize() const;
+    void addCase(int c);
+    std::string toString();
+    std::string labelString();
 private:
-    string m_decision;
-    string m_value;
-    set<int> m_block;
+    std::string m_decision;
+    std::string m_value;
+    std::set<int> m_block;
 };
 #endif
