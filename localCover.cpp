@@ -46,11 +46,14 @@ void LocalCover::dropRules(vector<AV *> avBlocks, set<int> B){
         return;
     }
     // Else: Covering has at least two rules
-    for( auto const & [id, rule] : m_rules){
+    map<int, set<int>>::iterator iter;
+    for(iter = m_rules.begin(); iter != m_rules.end();){
         LocalCover lc = *this;
         lc.removeRule(rule);
         if(lc.getCoveredConditions(avBlocks) == B){
-            this->removeRule(rule);
+            iter = m_rules.erase(iter);
+        } else {
+            iter++;
         }
     }
 }
