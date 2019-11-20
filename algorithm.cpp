@@ -8,7 +8,6 @@
     This class handles the execution
     of the MLEM2 algorithm. */
 
-
 #include "algorithm.hpp"
 #include <algorithm>
 #include <limits.h>
@@ -97,66 +96,24 @@ vector<Concept *> Algorithm::generateConcepts(Dataset * data){
     return concepts;
 }
 
-// LocalCover Algorithm::induceRules(Concept * concept){
-    // set<int> B = concept->getBlock();
-    // set<int> G = B;
-    // LocalCover lc(concept);
-    // size_t numOrigBlocks = m_avBlocks.size();
+void Algorithm::generateRuleset(ostream & file, Dataset * data){
+    // Generate program components
+    generateAVBlocks(data);
+    vector <Concept *> concepts = generateConcepts(data);
 
-    // // WHILE: G is non-empty
-    // while(!G.empty()){
-    //     Rule rule;
-    //     map<int, set<int>> T_G;
-
-    //     #if DEBUG == true
-    //         printSet("G = ", G);
-    //     #endif
+    // FOR: Each concept, generate rules and print to stream
+    for(Concept * concept : concepts){
+        #if DEBUG == true
+            cout << concept->toString() << endl;
+        #endif
         
-//         // FOR: All attribute-value blocks
-//         for(unsigned i = 0; i < numOrigBlocks; i++){
-//             set<int> intersectSet = setIntersection(m_avBlocks[i]->getBlock(), G);
-//             // IF: Intersection is non-empty
-//             if(!(intersectSet.empty())){
-//                 T_G[i] = intersectSet;
-//             }        
-//         }
-        
-//         // Select conditions for rule
-//         // WHILE: T is non-empty or T is not subsetEq to B
-//         while( (rule.empty()) || !(subsetEq(rule.getBlock(m_avBlocks), B)) ){
-//             // Find optimal choice; Add it to T
-//             int choicePos = getOptimalCondition(T_G);
-//             rule.addCondition(choicePos);
-                
-//             // Update goal set
-//             G = setIntersection(m_avBlocks[choicePos]->getBlock(), G);
-        
-//             // FOR: Relevant attribute-value block intersections
-//             for(auto const & [i, intersect] : T_G){
-//                 if(rule.containsCondition(i)){
-//                     T_G[i] = setIntersection(m_avBlocks[i]->getBlock(), G);
-//                 } else {
-//                     T_G.erase(i);
-//                 }
-//             }
-//         } // END WHILE (INNER LOOP)
+        LocalCover rules = induceRules(concept);
+        file << rules.toString(m_avBlocks);
 
-        // // Remove unnecessary conditions
-        // rule.mergeIntervals(m_avBlocks);
-        // rule.dropConditions(m_avBlocks, B);
+        delete concept;
+    }
+}
 
-        // // Add to local covering
-        // lc.addRule(new Rule(rule));
-        
-        // // Update goal set
-        // G = setDifference(B, lc.getCoveredConditions(m_avBlocks));
-//     } // END WHILE (OUTER LOOP)
-
-    // // Remove unnecessary rules
-    // lc.dropRules(m_avBlocks, B);
-
-//     return lc;
-// }
 
 LocalCover Algorithm::induceRules(Concept * concept){
     set<int> B = concept->getBlock();
@@ -200,7 +157,6 @@ LocalCover Algorithm::induceRules(Concept * concept){
 
         // Remove unnecessary conditions
         //rule.mergeIntervals(m_avBlocks);
-        //cout << "!";
         rule.dropConditions(m_avBlocks, B);
 
         // Add to local covering
@@ -214,24 +170,6 @@ LocalCover Algorithm::induceRules(Concept * concept){
     lc.dropRules(m_avBlocks, B);
 
     return lc;
-}
-
-void Algorithm::generateRuleset(ostream & file, Dataset * data){
-    // Generate program components
-    generateAVBlocks(data);
-    vector <Concept *> concepts = generateConcepts(data);
-
-    // FOR: Each concept, generate rules and print to stream
-    for(Concept * concept : concepts){
-        #if DEBUG == true
-            cout << concept->toString() << endl;
-        #endif
-        
-        LocalCover rules = induceRules(concept);
-        file << rules.toString(m_avBlocks);
-
-        delete concept;
-    }
 }
 
 int Algorithm::getOptimalCondition(map<int, set<int>> T_G){

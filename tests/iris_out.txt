@@ -1,18 +1,16 @@
 1, 50, 50
 (petal_length, 1..2.45) -> (class, Iris-setosa)
-7, 46, 46
-(petal_length, 2.45..6.9000001) & (petal_length, 3.1500001..6.9000001) & (petal_length, 1..4.9499998) & (petal_length, 1..5.1499996) & (petal_width, 0.1..1.6500001) & (petal_width, 0.1..1.75) & (petal_width, 0.1..1.8499999) -> (class, Iris-versicolor)
-10, 2, 2
-(sepal_length, 5.0500002..7.9000001) & (sepal_length, 5.9499998..7.9000001) & (sepal_length, 4.3000002..6.75) & (sepal_width, 2.45..4.4000001) & (sepal_width, 2..3.25) & (petal_length, 4.9499998..6.9000001) & (petal_length, 1..5.1499996) & (petal_width, 1.05..2.5) & (petal_width, 1.55..2.5) & (petal_width, 0.1..1.8499999) -> (class, Iris-versicolor)
-4, 20, 20
-(sepal_length, 5.0500002..7.9000001) & (sepal_length, 4.3000002..5.9499998) & (petal_length, 1..4.8500004) & (petal_width, 1.05..2.5) -> (class, Iris-versicolor)
-24, 27, 27
-(sepal_length, 5.6499996..7.9000001) & (sepal_length, 5.75..7.9000001) & (sepal_length, 4.3000002..6.9499998) & (sepal_length, 4.3000002..7.1499996) & (sepal_length, 4.3000002..7.3500004) & (sepal_length, 4.3000002..7.5) & (sepal_length, 4.3000002..7.6499996) & (sepal_length, 4.3000002..7.8000002) & (sepal_width, 2.45..4.4000001) & (sepal_width, 2..3.45) & (sepal_width, 2..3.6500001) & (petal_length, 4.4499998..6.9000001) & (petal_length, 4.75..6.9000001) & (petal_length, 4.8500004..6.9000001) & (petal_length, 1..5.8500004) & (petal_length, 1..5.9499998) & (petal_length, 1..6.0500002) & (petal_length, 1..6.6499996) & (petal_length, 1..6.8000002) & (petal_width, 1.3499999..2.5) & (petal_width, 1.45..2.5) & (petal_width, 1.55..2.5) & (petal_width, 1.75..2.5) & (petal_width, 0.1..2.45) -> (class, Iris-viginica)
-9, 37, 37
-(sepal_length, 5.6499996..7.9000001) & (sepal_length, 5.9499998..7.9000001) & (sepal_width, 2.55..4.4000001) & (petal_length, 4.4499998..6.9000001) & (petal_length, 4.75..6.9000001) & (petal_width, 1.3499999..2.5) & (petal_width, 1.45..2.5) & (petal_width, 1.55..2.5) & (petal_width, 1.75..2.5) -> (class, Iris-viginica)
-10, 4, 4
-(sepal_length, 4.3000002..6.3500004) & (sepal_width, 2..2.6500001) & (sepal_width, 2..2.8499999) & (sepal_width, 2..3.05) & (petal_length, 4.4499998..6.9000001) & (petal_length, 4.8500004..6.9000001) & (petal_length, 4.9499998..6.9000001) & (petal_length, 1..5.8500004) & (petal_width, 1.3499999..2.5) & (petal_width, 0.1..2.05) -> (class, Iris-viginica)
-9, 8, 8
-(sepal_length, 4.3000002..6.3500004) & (sepal_width, 2.45..4.4000001) & (sepal_width, 2..2.8499999) & (sepal_width, 2..3.05) & (petal_length, 4.4499998..6.9000001) & (petal_length, 1..5.8500004) & (petal_width, 1.45..2.5) & (petal_width, 1.6500001..2.5) & (petal_width, 0.1..2.05) -> (class, Iris-viginica)
-2, 35, 35
-(sepal_length, 6.25..7.9000001) & (petal_length, 5.0500002..6.9000001) -> (class, Iris-viginica)
+3, 47, 47
+(petal_length, 1..4.9499998) & (petal_width, 0.80000001..2.5) & (petal_width, 0.1..1.6500001) -> (class, Iris-versicolor)
+5, 2, 2
+(sepal_length, 5.9499998..7.9000001) & (petal_length, 4.9499998..6.9000001) & (petal_length, 1..5.4499998) & (petal_width, 1.55..2.5) & (petal_width, 0.1..1.8499999) -> (class, Iris-versicolor)
+3, 1, 1
+(sepal_length, 4.3000002..5.9499998) & (sepal_width, 3.1500001..4.4000001) & (petal_width, 1.75..2.5) -> (class, Iris-versicolor)
+2, 43, 43
+(petal_length, 4.8500004..6.9000001) & (petal_width, 1.75..2.5) -> (class, Iris-viginica)
+2, 3, 3
+(petal_length, 4.9499998..6.9000001) & (petal_width, 0.1..1.55) -> (class, Iris-viginica)
+3, 10, 10
+(sepal_length, 4.3000002..6.25) & (sepal_width, 2..3.1500001) & (petal_width, 1.6500001..2.5) -> (class, Iris-viginica)
+1, 11, 11
+(sepal_length, 7.1499996..7.9000001) -> (class, Iris-viginica)

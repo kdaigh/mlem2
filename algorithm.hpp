@@ -17,7 +17,7 @@
 #include "utils.hpp"
 #include <set>
 #include <vector>
-#define DEBUG true
+#define DEBUG false
 
 class Algorithm {
 public:
@@ -29,15 +29,15 @@ public:
 
     /* Generate concept blocks for dataset. */
     std::vector<Concept *> generateConcepts(Dataset * data);
+    
+    /* Creates string with all rules in (a, v) -> (d, v) format. */
+    void generateRuleset(ostream & file, Dataset * data);
 
     /* Generate ruleset using MLEM2. */
     LocalCover induceRules(Concept * concept);
 
     /* Finds the position of the best attribute-value pair. */
     int getOptimalCondition(map<int, set<int>> T_G);
-    
-    /* Creates string with all rules in (a, v) -> (d, v) format. */
-    void generateRuleset(ostream & file, Dataset * data);
 
 private:
     std::size_t m_numAttributes;
