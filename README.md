@@ -13,20 +13,8 @@ and run with the command
 
 The program requests an input and output file after it is initialized. The expected format for these files includes any necessary extension, i.e. "test.txt". Please provide different input and output file names.
 
-### Execution Time
-For small data sets, results can be expected in less than a few minutes. For larger data sets, allow at least ten minutes for results. The timing of the program's execution, from start to finish, for the given test files have been provided below for reference:
-    
-
-| File       | Cases | Attributes | Time      |
-|------------|-------|------------|-----------|
-| austr.txt  | 690   | 14         | 10m 53s   |
-| bowl.txt   | 720   | 4          | -         |
-| breast.txt | 277   | 9          | -         |
-| iris.txt   | 150   | 4          | 0m 21s    |
-| test.txt   | 7     | 3          | 0m 10s    |
-| wine.txt   | 178   | 13         | 0m 10s     |
-
-This data was collected on the cycle servers, using the Linux time command.
+### Features
+The program performs condition dropping and rule dropping as a part of the MLEM2 algorithm. There is a tentative implementation for merging intervals but it is not yet fully functional.
 
 ### Algorithm Implementation
 ## Ordering
